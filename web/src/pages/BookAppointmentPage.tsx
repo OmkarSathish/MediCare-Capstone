@@ -56,11 +56,13 @@ export default function BookAppointmentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Load centers on mount
+  // Load centers on mount — if coming from a test page, only show centers that offer that test
   useEffect(() => {
     setCentersLoading(true);
-    centersApi
-      .list()
+    const fetchPromise = preFillTestId
+      ? centersApi.getByTestId(Number(preFillTestId))
+      : centersApi.list();
+    fetchPromise
       .then((r) => {
         const list = r.data.data ?? [];
         setCenters(list);
@@ -73,7 +75,7 @@ export default function BookAppointmentPage() {
         }
       })
       .finally(() => setCentersLoading(false));
-  }, [preFillCenterId]);
+  }, [preFillCenterId, preFillTestId]);
 
   // Load tests when center selected
   useEffect(() => {
