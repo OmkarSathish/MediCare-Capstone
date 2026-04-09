@@ -62,7 +62,14 @@ export default function ProfilePage() {
             .finally(() => setResultsLoading(false));
         }
       })
-      .catch(() => setCreateMode(true))
+      .catch(() => {
+        setCreateMode(true);
+        setForm((f) => ({
+          ...f,
+          name: user?.fullName ?? "",
+          phoneNo: user?.phone ?? "",
+        }));
+      })
       .finally(() => setLoading(false));
   }, [targetUsername]);
 
