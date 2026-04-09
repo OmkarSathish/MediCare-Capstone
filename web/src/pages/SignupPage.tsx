@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Activity, Loader2, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Activity, Loader2 } from "lucide-react";
 import { authApi } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -15,7 +17,6 @@ export default function SignupPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const handleChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -43,8 +44,8 @@ export default function SignupPage() {
         password: form.password,
         role: "CUSTOMER",
       });
-      setSuccess(true);
-      setTimeout(() => navigate("/login"), 2000);
+      await login(form.email, form.password);
+      navigate(`/profile/${form.email}`, { replace: true });
     } catch (err: any) {
       const fieldErrors = err?.response?.data?.fieldErrors;
       if (fieldErrors?.length) {
@@ -60,16 +61,8 @@ export default function SignupPage() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900">Account Created!</h2>
-          <p className="text-gray-500 mt-2">Redirecting you to login…</p>
-        </div>
-      </div>
-    );
+  if (false) {
+    // removed success screen
   }
 
   return (

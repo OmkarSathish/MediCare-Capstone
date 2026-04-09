@@ -124,9 +124,6 @@ export default function ProfilePage() {
                 {profile?.name ?? user?.fullName}
               </h2>
               <p className="text-gray-500 text-sm">{user?.email}</p>
-              {user?.phone && (
-                <p className="text-gray-400 text-xs">{user.phone}</p>
-              )}
             </div>
           </div>
           {isOwner && !createMode && !editing && profile && (
