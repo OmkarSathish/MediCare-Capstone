@@ -10,6 +10,7 @@ import {
   Loader2,
   X,
   CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { appointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
@@ -21,6 +22,7 @@ export default function AppointmentDetailPage() {
   const [appt, setAppt] = useState<AppointmentDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -33,9 +35,9 @@ export default function AppointmentDetailPage() {
   }, [id]);
 
   const handleCancel = async () => {
-    if (!id || !confirm("Are you sure you want to cancel this appointment?"))
-      return;
+    if (!id) return;
     setCancelling(true);
+    setShowCancelModal(false);
     try {
       await appointmentApi.cancel(Number(id));
       navigate("/appointments");
@@ -67,6 +69,39 @@ export default function AppointmentDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      {/* Cancel confirmation modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Cancel Appointment
+              </h3>
+            </div>
+            <p className="text-gray-500 text-sm mb-6">
+              Are you sure you want to cancel this appointment? This action
+              cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Keep Appointment
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Link
         to="/appointments"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-6"
@@ -99,9 +134,10 @@ export default function AppointmentDetailPage() {
               </p>
             )}
           </div>
-          {appt.approvalStatus === "PENDING" && (
+          {(appt.approvalStatus === "PENDING" ||
+            appt.approvalStatus === "APPROVED") && (
             <button
-              onClick={handleCancel}
+              onClick={() => setShowCancelModal(true)}
               disabled={cancelling}
               className="flex items-center gap-2 text-sm font-medium text-red-600 border border-red-200 rounded-xl px-4 py-2 hover:bg-red-50 transition-colors disabled:opacity-60"
             >

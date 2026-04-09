@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Calendar, ChevronRight, Loader2, Plus } from "lucide-react";
+import {
+  Calendar,
+  ChevronRight,
+  Loader2,
+  Plus,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import { appointmentApi } from "../api/appointments";
 import { useAuth } from "../context/AuthContext";
 import { StatusBadge } from "../components/StatusBadge";
@@ -13,13 +20,36 @@ export default function AppointmentsPage() {
   const [filter, setFilter] = useState<
     "ALL" | "PENDING" | "APPROVED" | "REJECTED"
   >("ALL");
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
-  useEffect(() => {
+  const fetchAppointments = () => {
     appointmentApi
       .list()
       .then((r) => setAppointments(r.data.data ?? []))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchAppointments();
   }, []);
+
+  const handleCancel = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    setConfirmId(id);
+  };
+
+  const confirmCancel = async () => {
+    if (confirmId === null) return;
+    setCancellingId(confirmId);
+    setConfirmId(null);
+    try {
+      await appointmentApi.cancel(confirmId);
+      setAppointments((prev) => prev.filter((a) => a.id !== confirmId));
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   const filtered =
     filter === "ALL"
@@ -28,6 +58,39 @@ export default function AppointmentsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Cancel confirmation modal */}
+      {confirmId !== null && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Cancel Appointment
+              </h3>
+            </div>
+            <p className="text-gray-500 text-sm mb-6">
+              Are you sure you want to cancel this appointment? This action
+              cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmId(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Keep Appointment
+              </button>
+              <button
+                onClick={confirmCancel}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900">
@@ -110,6 +173,22 @@ export default function AppointmentsPage() {
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge status={appt.approvalStatus} />
+                {!isAdmin &&
+                  (appt.approvalStatus === "PENDING" ||
+                    appt.approvalStatus === "APPROVED") && (
+                    <button
+                      onClick={(e) => handleCancel(e, appt.id)}
+                      disabled={cancellingId === appt.id}
+                      className="flex items-center gap-1 text-xs font-medium text-red-600 border border-red-200 rounded-lg px-2.5 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-60"
+                    >
+                      {cancellingId === appt.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <X className="w-3.5 h-3.5" />
+                      )}
+                      Cancel
+                    </button>
+                  )}
                 <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
               </div>
             </Link>
