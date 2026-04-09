@@ -48,6 +48,19 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
     @Override
     public List<Appointment> getAppointmentList(int centerId, String test, int status) {
+        // When no centerId/testName filter, use efficient single-column queries
+        if (centerId == 0 && (test == null || test.isEmpty())) {
+            if (status == -1) {
+                return appointmentRepository.findAll();
+            }
+            ApprovalStatus approvalStatus = switch (status) {
+                case 1 -> ApprovalStatus.APPROVED;
+                case 2 -> ApprovalStatus.REJECTED;
+                default -> ApprovalStatus.PENDING;
+            };
+            return appointmentRepository.findByApprovalStatus(approvalStatus);
+        }
+        // Full filter: centerId + testName + status
         ApprovalStatus approvalStatus = switch (status) {
             case 1 -> ApprovalStatus.APPROVED;
             case 2 -> ApprovalStatus.REJECTED;

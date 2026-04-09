@@ -25,57 +25,57 @@ import java.util.List;
 @Tag(name = "Admin — Appointments", description = "Admin approval, rejection, and filtered appointment listing")
 public class AdminAppointmentController {
 
-    private final IAppointmentService appointmentService;
-    private final IAppointmentWorkflowService workflowService;
+        private final IAppointmentService appointmentService;
+        private final IAppointmentWorkflowService workflowService;
 
-    // ── GET /api/admin/appointments ───────────────────────────────────────────
-    @GetMapping
-    @Operation(summary = "List appointments filtered by center, test, and status")
-    public ResponseEntity<ApiResponse<List<AppointmentResponse>>> listAppointments(
-            @RequestParam(defaultValue = "0") int centerId,
-            @RequestParam(defaultValue = "") String test,
-            @RequestParam(defaultValue = "0") int status) {
+        // ── GET /api/admin/appointments ───────────────────────────────────────────
+        @GetMapping
+        @Operation(summary = "List appointments filtered by center, test, and status")
+        public ResponseEntity<ApiResponse<List<AppointmentResponse>>> listAppointments(
+                        @RequestParam(defaultValue = "0") int centerId,
+                        @RequestParam(defaultValue = "") String test,
+                        @RequestParam(defaultValue = "-1") int status) {
 
-        List<Appointment> appointments = appointmentService.getAppointmentList(centerId, test, status);
-        return ResponseEntity.ok(ApiResponse.ok(
-                appointments.stream().map(this::toResponse).toList()));
-    }
+                List<Appointment> appointments = appointmentService.getAppointmentList(centerId, test, status);
+                return ResponseEntity.ok(ApiResponse.ok(
+                                appointments.stream().map(this::toResponse).toList()));
+        }
 
-    // ── PUT /api/admin/appointments/{id}/approve ───────────────────────────────
-    @PutMapping("/{id}/approve")
-    @Operation(summary = "Approve a pending appointment")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> approve(
-            @PathVariable int id,
-            @Valid @RequestBody ApproveAppointmentRequest request,
-            @AuthenticationPrincipal UserPrincipal principal) {
+        // ── PUT /api/admin/appointments/{id}/approve ───────────────────────────────
+        @PutMapping("/{id}/approve")
+        @Operation(summary = "Approve a pending appointment")
+        public ResponseEntity<ApiResponse<AppointmentResponse>> approve(
+                        @PathVariable int id,
+                        @Valid @RequestBody ApproveAppointmentRequest request,
+                        @AuthenticationPrincipal UserPrincipal principal) {
 
-        Appointment updated = workflowService.approveAppointment(
-                id, principal.getUsername(), request.getRemarks());
-        return ResponseEntity.ok(ApiResponse.ok("Appointment approved", toResponse(updated)));
-    }
+                Appointment updated = workflowService.approveAppointment(
+                                id, principal.getUsername(), request.getRemarks());
+                return ResponseEntity.ok(ApiResponse.ok("Appointment approved", toResponse(updated)));
+        }
 
-    // ── PUT /api/admin/appointments/{id}/reject ────────────────────────────────
-    @PutMapping("/{id}/reject")
-    @Operation(summary = "Reject a pending appointment")
-    public ResponseEntity<ApiResponse<AppointmentResponse>> reject(
-            @PathVariable int id,
-            @Valid @RequestBody RejectAppointmentRequest request,
-            @AuthenticationPrincipal UserPrincipal principal) {
+        // ── PUT /api/admin/appointments/{id}/reject ────────────────────────────────
+        @PutMapping("/{id}/reject")
+        @Operation(summary = "Reject a pending appointment")
+        public ResponseEntity<ApiResponse<AppointmentResponse>> reject(
+                        @PathVariable int id,
+                        @Valid @RequestBody RejectAppointmentRequest request,
+                        @AuthenticationPrincipal UserPrincipal principal) {
 
-        Appointment updated = workflowService.rejectAppointment(
-                id, principal.getUsername(), request.getRemarks());
-        return ResponseEntity.ok(ApiResponse.ok("Appointment rejected", toResponse(updated)));
-    }
+                Appointment updated = workflowService.rejectAppointment(
+                                id, principal.getUsername(), request.getRemarks());
+                return ResponseEntity.ok(ApiResponse.ok("Appointment rejected", toResponse(updated)));
+        }
 
-    // ── helper ────────────────────────────────────────────────────────────────
-    private AppointmentResponse toResponse(Appointment a) {
-        return AppointmentResponse.builder()
-                .id(a.getId())
-                .appointmentDate(a.getAppointmentDate())
-                .approvalStatus(a.getApprovalStatus())
-                .patientName(a.getPatient().getName())
-                .centerName(a.getDiagnosticCenter().getName())
-                .remarks(a.getRemarks())
-                .build();
-    }
+        // ── helper ────────────────────────────────────────────────────────────────
+        private AppointmentResponse toResponse(Appointment a) {
+                return AppointmentResponse.builder()
+                                .id(a.getId())
+                                .appointmentDate(a.getAppointmentDate())
+                                .approvalStatus(a.getApprovalStatus())
+                                .patientName(a.getPatient().getName())
+                                .centerName(a.getDiagnosticCenter().getName())
+                                .remarks(a.getRemarks())
+                                .build();
+        }
 }
