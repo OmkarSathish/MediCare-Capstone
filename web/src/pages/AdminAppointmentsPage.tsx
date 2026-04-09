@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Loader2, ChevronRight, Check, X, Search } from "lucide-react";
 import { adminAppointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
 import type { AppointmentResponse, ApprovalStatus } from "../types";
 
 export default function AdminAppointmentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ApprovalStatus | "ALL">("ALL");
@@ -38,6 +39,19 @@ export default function AdminAppointmentsPage() {
   useEffect(() => {
     fetchAppointments(filter);
   }, [filter]);
+
+  // Auto-open review modal if ?review=<id> is in URL
+  useEffect(() => {
+    const reviewId = searchParams.get("review");
+    if (reviewId && appointments.length > 0) {
+      const found = appointments.find((a) => a.id === Number(reviewId));
+      if (found && found.approvalStatus === "PENDING") {
+        setActionId(Number(reviewId));
+        setActionType("approve");
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, appointments]);
 
   const filtered = appointments.filter(
     (a) =>

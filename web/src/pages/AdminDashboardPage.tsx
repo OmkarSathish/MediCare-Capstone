@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="py-3">
                       <Link
-                        to={`/admin/appointments/${a.id}`}
+                        to={`/admin/appointments?review=${a.id}`}
                         className="text-blue-600 hover:underline text-xs"
                       >
                         Review →
