@@ -9,5 +9,7 @@ public interface IAppointmentWorkflowService {
 
     Appointment rejectAppointment(int appointmentId, String adminUsername, String remarks);
 
+    Appointment cancelAppointment(int appointmentId, String username);
+
     boolean canTransition(ApprovalStatus current, ApprovalStatus next);
 }

@@ -55,7 +55,7 @@ export interface TestResultResponse {
 
 // ─── Appointment ──────────────────────────────────────────────────────────────
 
-export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
 
 export interface CreateAppointmentRequest {
   centerId: number;

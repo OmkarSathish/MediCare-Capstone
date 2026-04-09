@@ -22,6 +22,7 @@ export default function AdminAppointmentsPage() {
     PENDING: 0,
     APPROVED: 1,
     REJECTED: 2,
+    CANCELLED: 3,
   };
 
   const fetchAppointments = async (status: string) => {
@@ -158,7 +159,9 @@ export default function AdminAppointmentsPage() {
           />
         </div>
         <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
-          {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map((f) => (
+          {(
+            ["ALL", "PENDING", "APPROVED", "REJECTED", "CANCELLED"] as const
+          ).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}

@@ -18,7 +18,7 @@ export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<
-    "ALL" | "PENDING" | "APPROVED" | "REJECTED"
+    "ALL" | "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED"
   >("ALL");
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [confirmId, setConfirmId] = useState<number | null>(null);
@@ -45,7 +45,7 @@ export default function AppointmentsPage() {
     setConfirmId(null);
     try {
       await appointmentApi.cancel(confirmId);
-      setAppointments((prev) => prev.filter((a) => a.id !== confirmId));
+      fetchAppointments();
     } finally {
       setCancellingId(null);
     }
@@ -113,16 +113,18 @@ export default function AppointmentsPage() {
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
-        {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
+        {(["ALL", "PENDING", "APPROVED", "REJECTED", "CANCELLED"] as const).map(
+          (f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all
               ${filter === f ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-          >
-            {f}
-          </button>
-        ))}
+            >
+              {f}
+            </button>
+          ),
+        )}
       </div>
 
       {loading ? (

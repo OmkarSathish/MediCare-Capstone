@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   Calendar,
   Building2,
@@ -18,7 +18,6 @@ import type { AppointmentDetailResponse } from "../types";
 
 export default function AppointmentDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [appt, setAppt] = useState<AppointmentDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
@@ -39,8 +38,12 @@ export default function AppointmentDetailPage() {
     setCancelling(true);
     setShowCancelModal(false);
     try {
-      await appointmentApi.cancel(Number(id));
-      navigate("/appointments");
+      const res = await appointmentApi.cancel(Number(id));
+      setAppt((prev) =>
+        prev
+          ? { ...prev, approvalStatus: res.data.data!.approvalStatus }
+          : prev,
+      );
     } catch {
       setError("Failed to cancel appointment.");
     } finally {

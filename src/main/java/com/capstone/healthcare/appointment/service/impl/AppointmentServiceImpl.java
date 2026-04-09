@@ -56,6 +56,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
             ApprovalStatus approvalStatus = switch (status) {
                 case 1 -> ApprovalStatus.APPROVED;
                 case 2 -> ApprovalStatus.REJECTED;
+                case 3 -> ApprovalStatus.CANCELLED;
                 default -> ApprovalStatus.PENDING;
             };
             return appointmentRepository.findByApprovalStatus(approvalStatus);
@@ -64,6 +65,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
         ApprovalStatus approvalStatus = switch (status) {
             case 1 -> ApprovalStatus.APPROVED;
             case 2 -> ApprovalStatus.REJECTED;
+            case 3 -> ApprovalStatus.CANCELLED;
             default -> ApprovalStatus.PENDING;
         };
         return appointmentRepository.findByCenterAndTestAndStatus(centerId, test, approvalStatus);

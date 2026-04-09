@@ -5,6 +5,7 @@ export function StatusBadge({ status }: { status: ApprovalStatus }) {
     PENDING: "badge-pending",
     APPROVED: "badge-approved",
     REJECTED: "badge-rejected",
+    CANCELLED: "badge-cancelled",
   };
   return <span className={map[status]}>{status}</span>;
 }
