@@ -19,6 +19,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
 import AdminCentersPage from "./pages/AdminCentersPage";
+import AdminTestsPage from "./pages/AdminTestsPage";
 
 function Layout() {
   return (
@@ -114,6 +115,14 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <AdminCentersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/tests"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminTestsPage />
                 </ProtectedRoute>
               }
             />

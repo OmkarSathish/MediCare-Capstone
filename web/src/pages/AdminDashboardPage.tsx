@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
             value: stats?.totalTests ?? 0,
             icon: Microscope,
             color: "bg-indigo-50 text-indigo-600",
-            link: "/tests",
+            link: "/admin/tests",
           },
           {
             label: "Pending Appointments",
@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
           {
             label: "All Tests",
             desc: "Browse the diagnostic test catalog",
-            href: "/tests",
+            href: "/admin/tests",
             icon: Microscope,
           },
         ].map(({ label, desc, href, icon: Icon }) => (
