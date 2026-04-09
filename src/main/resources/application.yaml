@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: healthcare-app
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/healthcare_appointment_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: false
+    locations:
+      - classpath:db/migration/auth
+      - classpath:db/migration/patient
+      - classpath:db/migration/diagnosticcenter
+      - classpath:db/migration/diagnostictest
+      - classpath:db/migration/appointment
+    baseline-on-migrate: true
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:changeme-this-must-be-at-least-32-chars-long}
+    expiration-ms: 86400000           # 24 hours
+    refresh-expiration-ms: 604800000  # 7 days
+
+server:
+  port: 8080
