@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
             value: stats?.totalCenters ?? 0,
             icon: Building2,
             color: "bg-blue-50 text-blue-600",
-            link: "/centers",
+            link: "/admin/centers",
           },
           {
             label: "Diagnostic Tests",
@@ -109,14 +109,14 @@ export default function AdminDashboardPage() {
             icon: Clock,
           },
           {
-            label: "All Centers",
-            desc: "View and manage diagnostic centers",
-            href: "/centers",
+            label: "Manage Centers",
+            desc: "Add, edit, or deactivate diagnostic centers",
+            href: "/admin/centers",
             icon: Building2,
           },
           {
             label: "All Tests",
-            desc: "Manage the diagnostic test catalog",
+            desc: "Browse the diagnostic test catalog",
             href: "/tests",
             icon: Microscope,
           },

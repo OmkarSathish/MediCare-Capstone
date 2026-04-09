@@ -20,4 +20,31 @@ export const centersApi = {
 
   getByTestId: (testId: number) =>
     api.get<ApiResponse<CenterSearchResponse[]>>(`/centers/offering/${testId}`),
+
+  create: (data: {
+    name: string;
+    address: string;
+    contactNo?: string;
+    contactEmail?: string;
+    servicesOffered?: string[];
+  }) => api.post<ApiResponse<CenterResponse>>("/centers", data),
+
+  update: (
+    id: number,
+    data: {
+      name: string;
+      address: string;
+      contactNo?: string;
+      contactEmail?: string;
+      servicesOffered?: string[];
+    },
+  ) => api.put<ApiResponse<CenterResponse>>(`/centers/${id}`, data),
+
+  addTest: (centerId: number, testId: number) =>
+    api.post<ApiResponse<CenterTestOfferingResponse>>(
+      `/centers/${centerId}/tests/${testId}`,
+    ),
+
+  delete: (id: number) =>
+    api.delete<ApiResponse<CenterResponse>>(`/centers/${id}`),
 };
