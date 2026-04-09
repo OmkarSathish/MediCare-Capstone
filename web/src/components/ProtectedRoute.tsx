@@ -6,9 +6,11 @@ import { Loader2 } from "lucide-react";
 export function ProtectedRoute({
   children,
   adminOnly = false,
+  patientOnly = false,
 }: {
   children: ReactNode;
   adminOnly?: boolean;
+  patientOnly?: boolean;
 }) {
   const { user, loading, isAdmin } = useAuth();
 
@@ -21,5 +23,6 @@ export function ProtectedRoute({
 
   if (!user) return <Navigate to="/login" replace />;
   if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
+  if (patientOnly && isAdmin) return <Navigate to="/admin" replace />;
   return <>{children}</>;
 }

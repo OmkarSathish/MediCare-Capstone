@@ -4,7 +4,7 @@ import { Eye, EyeOff, Activity, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPwd, setShowPwd] = useState(false);
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(form.username, form.password);
-      navigate("/dashboard");
+      navigate(isAdmin ? "/admin" : "/dashboard");
     } catch (err: any) {
       setError(
         err?.response?.data?.message ??

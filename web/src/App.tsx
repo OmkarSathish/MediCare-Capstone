@@ -56,7 +56,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute patientOnly>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -64,7 +64,7 @@ function App() {
             <Route
               path="/book"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute patientOnly>
                   <BookAppointmentPage />
                 </ProtectedRoute>
               }
