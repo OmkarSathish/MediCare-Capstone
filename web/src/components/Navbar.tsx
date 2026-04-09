@@ -44,18 +44,34 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             {isAdmin ? (
               <>
-                <NavLink to="/admin" end className={navLinkClass}>Dashboard</NavLink>
-                <NavLink to="/admin/appointments" className={navLinkClass}>Appointments</NavLink>
-                <NavLink to="/admin/centers" className={navLinkClass}>Centers</NavLink>
-                <NavLink to="/admin/tests" className={navLinkClass}>Tests</NavLink>
+                <NavLink to="/admin" end className={navLinkClass}>
+                  Dashboard
+                </NavLink>
+                <NavLink to="/admin/appointments" className={navLinkClass}>
+                  Appointments
+                </NavLink>
+                <NavLink to="/admin/centers" className={navLinkClass}>
+                  Centers
+                </NavLink>
+                <NavLink to="/admin/tests" className={navLinkClass}>
+                  Tests
+                </NavLink>
               </>
             ) : (
               <>
-                <NavLink to="/" end className={navLinkClass}>Home</NavLink>
-                <NavLink to="/centers" className={navLinkClass}>Centers</NavLink>
-                <NavLink to="/tests" className={navLinkClass}>Tests</NavLink>
+                <NavLink to="/" end className={navLinkClass}>
+                  Home
+                </NavLink>
+                <NavLink to="/centers" className={navLinkClass}>
+                  Centers
+                </NavLink>
+                <NavLink to="/tests" className={navLinkClass}>
+                  Tests
+                </NavLink>
                 {user && (
-                  <NavLink to="/appointments" className={navLinkClass}>Appointments</NavLink>
+                  <NavLink to="/appointments" className={navLinkClass}>
+                    Appointments
+                  </NavLink>
                 )}
               </>
             )}
@@ -81,25 +97,49 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
                     {isAdmin ? (
                       <>
-                        <Link to="/admin" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to="/admin"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <LayoutDashboard className="w-4 h-4" /> Dashboard
                         </Link>
-                        <Link to="/admin/appointments" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to="/admin/appointments"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <Calendar className="w-4 h-4" /> Appointments
                         </Link>
-                        <Link to="/admin/centers" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to="/admin/centers"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <Building2 className="w-4 h-4" /> Centers
                         </Link>
-                        <Link to="/admin/tests" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to="/admin/tests"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <FlaskConical className="w-4 h-4" /> Tests
                         </Link>
                       </>
                     ) : (
                       <>
-                        <Link to={`/profile/${user.email}`} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to={`/profile/${user.email}`}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <User className="w-4 h-4" /> My Profile
                         </Link>
-                        <Link to="/appointments" className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600" onClick={() => setDropOpen(false)}>
+                        <Link
+                          to="/appointments"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
                           <Calendar className="w-4 h-4" /> Appointments
                         </Link>
                       </>
@@ -151,18 +191,68 @@ export default function Navbar() {
         <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
           {isAdmin ? (
             <>
-              <NavLink to="/admin" end className={navLinkClass} onClick={() => setMobileOpen(false)}>Dashboard</NavLink>
-              <NavLink to="/admin/appointments" className={navLinkClass} onClick={() => setMobileOpen(false)}>Appointments</NavLink>
-              <NavLink to="/admin/centers" className={navLinkClass} onClick={() => setMobileOpen(false)}>Centers</NavLink>
-              <NavLink to="/admin/tests" className={navLinkClass} onClick={() => setMobileOpen(false)}>Tests</NavLink>
+              <NavLink
+                to="/admin"
+                end
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
+                to="/admin/appointments"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Appointments
+              </NavLink>
+              <NavLink
+                to="/admin/centers"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Centers
+              </NavLink>
+              <NavLink
+                to="/admin/tests"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Tests
+              </NavLink>
             </>
           ) : (
             <>
-              <NavLink to="/" end className={navLinkClass} onClick={() => setMobileOpen(false)}>Home</NavLink>
-              <NavLink to="/centers" className={navLinkClass} onClick={() => setMobileOpen(false)}>Centers</NavLink>
-              <NavLink to="/tests" className={navLinkClass} onClick={() => setMobileOpen(false)}>Tests</NavLink>
+              <NavLink
+                to="/"
+                end
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Home
+              </NavLink>
+              <NavLink
+                to="/centers"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Centers
+              </NavLink>
+              <NavLink
+                to="/tests"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Tests
+              </NavLink>
               {user && (
-                <NavLink to="/appointments" className={navLinkClass} onClick={() => setMobileOpen(false)}>Appointments</NavLink>
+                <NavLink
+                  to="/appointments"
+                  className={navLinkClass}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Appointments
+                </NavLink>
               )}
             </>
           )}
