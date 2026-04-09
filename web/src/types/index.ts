@@ -1,0 +1,160 @@
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export interface SignupRequest {
+  fullName: string;
+  email: string;
+  phone?: string;
+  password: string;
+  role: "CUSTOMER" | "ADMIN";
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+}
+
+export interface UserProfileResponse {
+  userId: number;
+  fullName: string;
+  email: string;
+  phone?: string;
+  roles: string[];
+}
+
+// ─── Patient ─────────────────────────────────────────────────────────────────
+
+export interface PatientProfileRequest {
+  name: string;
+  phoneNo?: string;
+  age: number;
+  gender?: string;
+}
+
+export interface PatientProfileResponse {
+  patientId: number;
+  name: string;
+  phoneNo?: string;
+  age: number;
+  gender?: string;
+  username: string;
+}
+
+export interface TestResultResponse {
+  id: number;
+  testReading: string;
+  medicalCondition: string;
+  appointmentId: number;
+}
+
+// ─── Appointment ──────────────────────────────────────────────────────────────
+
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface CreateAppointmentRequest {
+  centerId: number;
+  testIds: number[];
+  appointmentDate: string; // ISO date string
+}
+
+export interface AppointmentResponse {
+  id: number;
+  appointmentDate: string;
+  approvalStatus: ApprovalStatus;
+  patientName: string;
+  centerName: string;
+  remarks?: string;
+}
+
+export interface AppointmentDetailResponse {
+  id: number;
+  appointmentDate: string;
+  approvalStatus: ApprovalStatus;
+  remarks?: string;
+  patient: PatientProfileResponse;
+  center: { id: number; name: string; address: string };
+  diagnosticTests: { id: number; testName: string; testPrice: number }[];
+  statusHistory: StatusHistoryEntry[];
+}
+
+export interface StatusHistoryEntry {
+  previousStatus?: ApprovalStatus;
+  newStatus: ApprovalStatus;
+  changedBy: string;
+  changedAt: string;
+  comments?: string;
+}
+
+export interface AppointmentStatusResponse {
+  appointmentId: number;
+  currentStatus: ApprovalStatus;
+  history: StatusHistoryEntry[];
+}
+
+// ─── Diagnostic Center ────────────────────────────────────────────────────────
+
+export interface CenterSearchResponse {
+  id: number;
+  name: string;
+  address: string;
+}
+
+export interface CenterResponse {
+  id: number;
+  name: string;
+  contactNo?: string;
+  address: string;
+  contactEmail?: string;
+  status: string;
+  servicesOffered: string[];
+  tests: { id: number; testName: string; testPrice: number }[];
+}
+
+export interface CenterTestOfferingResponse {
+  centerId: number;
+  testId: number;
+  testName: string;
+  testPrice: number;
+  normalValue?: string;
+  units?: string;
+}
+
+// ─── Diagnostic Tests ─────────────────────────────────────────────────────────
+
+export interface TestResponse {
+  id: number;
+  testName: string;
+  testPrice: number;
+  normalValue?: string;
+  units?: string;
+  status: string;
+  categoryName?: string;
+}
+
+export interface TestSearchResponse {
+  id: number;
+  testName: string;
+  testPrice: number;
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminDashboardResponse {
+  totalCenters: number;
+  totalTests: number;
+  pendingAppointments: number;
+}
+
+// ─── API Wrapper ──────────────────────────────────────────────────────────────
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
