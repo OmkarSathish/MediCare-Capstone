@@ -8,7 +8,11 @@ import java.util.Set;
 
 @Entity
 @Table(schema = "auth_schema", name = "users")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserAccount {
 
     @Id
@@ -37,14 +41,12 @@ public class UserAccount {
     private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        schema = "auth_schema",
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(schema = "auth_schema", name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "center_id")
+    private Integer centerId;
 
     @PrePersist
     protected void onCreate() {
