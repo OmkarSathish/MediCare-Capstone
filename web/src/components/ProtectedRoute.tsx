@@ -7,11 +7,13 @@ export function ProtectedRoute({
   children,
   adminOnly = false,
   primaryAdminOnly = false,
+  centerAdminOnly = false,
   patientOnly = false,
 }: {
   children: ReactNode;
   adminOnly?: boolean;
   primaryAdminOnly?: boolean;
+  centerAdminOnly?: boolean;
   patientOnly?: boolean;
 }) {
   const { user, loading, isAdmin, isCenterAdmin } = useAuth();
@@ -27,6 +29,8 @@ export function ProtectedRoute({
   if (adminOnly && !isAdmin && !isCenterAdmin)
     return <Navigate to="/dashboard" replace />;
   if (primaryAdminOnly && !isAdmin) return <Navigate to="/admin" replace />;
+  if (centerAdminOnly && !isCenterAdmin)
+    return <Navigate to="/admin" replace />;
   if (patientOnly && (isAdmin || isCenterAdmin))
     return <Navigate to="/admin" replace />;
   return <>{children}</>;

@@ -48,9 +48,6 @@ export default function Navbar() {
                 <NavLink to="/admin" end className={navLinkClass}>
                   Dashboard
                 </NavLink>
-                <NavLink to="/admin/appointments" className={navLinkClass}>
-                  Appointments
-                </NavLink>
                 <NavLink to="/admin/centers" className={navLinkClass}>
                   Centers
                 </NavLink>
@@ -119,13 +116,6 @@ export default function Navbar() {
                           onClick={() => setDropOpen(false)}
                         >
                           <LayoutDashboard className="w-4 h-4" /> Dashboard
-                        </Link>
-                        <Link
-                          to="/admin/appointments"
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                          onClick={() => setDropOpen(false)}
-                        >
-                          <Calendar className="w-4 h-4" /> Appointments
                         </Link>
                         <Link
                           to="/admin/centers"
@@ -245,13 +235,6 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
               >
                 Dashboard
-              </NavLink>
-              <NavLink
-                to="/admin/appointments"
-                className={navLinkClass}
-                onClick={() => setMobileOpen(false)}
-              >
-                Appointments
               </NavLink>
               <NavLink
                 to="/admin/centers"

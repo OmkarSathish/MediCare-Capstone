@@ -106,7 +106,7 @@ function App() {
             <Route
               path="/admin/appointments"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute centerAdminOnly>
                   <AdminAppointmentsPage />
                 </ProtectedRoute>
               }

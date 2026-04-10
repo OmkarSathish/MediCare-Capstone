@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/appointments")
-@PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
+@PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
 @RequiredArgsConstructor
 @Tag(name = "Admin — Appointments", description = "Admin approval, rejection, and filtered appointment listing")
 public class AdminAppointmentController {

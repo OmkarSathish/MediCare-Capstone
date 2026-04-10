@@ -94,13 +94,6 @@ export default function AdminDashboardPage() {
                 color: "bg-indigo-50 text-indigo-600",
                 link: "/admin/tests",
               },
-              {
-                label: "Pending Appointments",
-                value: stats?.pendingAppointments ?? 0,
-                icon: Clock,
-                color: "bg-yellow-50 text-yellow-600",
-                link: "/admin/appointments",
-              },
             ]
         ).map(({ label, value, icon: Icon, color, link }) => (
           <Link
@@ -142,12 +135,6 @@ export default function AdminDashboardPage() {
               },
             ]
           : [
-              {
-                label: "Manage Appointments",
-                desc: "Approve or reject pending appointments",
-                href: "/admin/appointments",
-                icon: Clock,
-              },
               {
                 label: "Manage Centers",
                 desc: "Add, edit, or deactivate diagnostic centers",

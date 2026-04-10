@@ -42,10 +42,10 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/tests/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/centers/**").permitAll()
                                                 // Admin-only endpoints
-                                                // Appointment listing/approval: CENTER_ADMIN also allowed (guarded by
-                                                // @PreAuthorize)
+                                                // Appointments are CENTER_ADMIN only; all other /admin/** is primary
+                                                // ADMIN only
                                                 .requestMatchers("/api/admin/appointments/**")
-                                                .hasAnyRole(RoleConstants.ADMIN, RoleConstants.CENTER_ADMIN)
+                                                .hasRole(RoleConstants.CENTER_ADMIN)
                                                 .requestMatchers("/api/admin/**").hasRole(RoleConstants.ADMIN)
                                                 .requestMatchers(HttpMethod.POST, "/api/tests/**")
                                                 .hasRole(RoleConstants.ADMIN)
