@@ -149,7 +149,16 @@ export interface TestSearchResponse {
 export interface AdminDashboardResponse {
   totalCenters: number;
   totalTests: number;
+  totalPatients: number;
+  totalAppointments: number;
+  totalCenterAdmins: number;
   pendingAppointments: number;
+  approvedAppointments: number;
+  rejectedAppointments: number;
+  cancelledAppointments: number;
+  appointmentsByCenter: Record<string, number>;
+  appointmentsByMonth: Record<string, number>;
+  topTests: Record<string, number>;
 }
 
 // ─── API Wrapper ──────────────────────────────────────────────────────────────
