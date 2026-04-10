@@ -23,4 +23,17 @@ export const authApi = {
     api.post<ApiResponse<AuthResponse>>("/auth/token/refresh", {
       refreshToken,
     }),
+
+  listCenterAdmins: () =>
+    api.get<ApiResponse<UserProfileResponse[]>>("/auth/admin/center-admins"),
+
+  createCenterAdmin: (data: {
+    fullName: string;
+    email: string;
+    password: string;
+    centerId: number;
+  }) => api.post<ApiResponse<void>>("/auth/admin/center-admins", data),
+
+  removeCenterAdmin: (userId: number) =>
+    api.delete<ApiResponse<void>>(`/auth/admin/center-admins/${userId}`),
 };

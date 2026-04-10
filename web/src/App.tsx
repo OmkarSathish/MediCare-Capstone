@@ -20,6 +20,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminAppointmentsPage from "./pages/AdminAppointmentsPage";
 import AdminCentersPage from "./pages/AdminCentersPage";
 import AdminTestsPage from "./pages/AdminTestsPage";
+import AdminCenterAdminsPage from "./pages/AdminCenterAdminsPage";
 
 function Layout() {
   return (
@@ -113,7 +114,7 @@ function App() {
             <Route
               path="/admin/centers"
               element={
-                <ProtectedRoute adminOnly>
+                <ProtectedRoute primaryAdminOnly>
                   <AdminCentersPage />
                 </ProtectedRoute>
               }
@@ -123,6 +124,14 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <AdminTestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/center-admins"
+              element={
+                <ProtectedRoute primaryAdminOnly>
+                  <AdminCenterAdminsPage />
                 </ProtectedRoute>
               }
             />
