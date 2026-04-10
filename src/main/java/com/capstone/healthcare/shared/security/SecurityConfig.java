@@ -38,9 +38,9 @@ public class SecurityConfig {
                                                                 "/v3/api-docs",
                                                                 "/v3/api-docs/**")
                                                 .permitAll()
-                                                // Read-only test/center lookup available to authenticated users
-                                                .requestMatchers(HttpMethod.GET, "/api/tests/**").authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/centers/**").authenticated()
+                                                // Read-only test/center lookup is public
+                                                .requestMatchers(HttpMethod.GET, "/api/tests/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api/centers/**").permitAll()
                                                 // Admin-only endpoints
                                                 // Appointment listing/approval: CENTER_ADMIN also allowed (guarded by
                                                 // @PreAuthorize)
