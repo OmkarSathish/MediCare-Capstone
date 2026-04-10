@@ -7,10 +7,12 @@ import com.capstone.healthcare.auth.repository.IRoleRepository;
 import com.capstone.healthcare.auth.service.IAdminService;
 import com.capstone.healthcare.auth.service.IPasswordEncoderService;
 import com.capstone.healthcare.shared.exception.ValidationException;
+import com.capstone.healthcare.shared.security.RoleConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -37,5 +39,39 @@ public class AdminServiceImpl implements IAdminService {
                 .roles(Set.of(adminRole))
                 .build();
         adminRepository.save(admin);
+    }
+
+    @Override
+    @Transactional
+    public void registerCenterAdmin(String email, String password, String fullName, int centerId) {
+        if (adminRepository.existsByEmail(email)) {
+            throw new ValidationException("User already exists with email: " + email);
+        }
+        Role centerAdminRole = roleRepository.findByRoleName("CENTER_ADMIN")
+                .orElseGet(() -> roleRepository.save(Role.builder().roleName("CENTER_ADMIN").build()));
+        UserAccount centerAdmin = UserAccount.builder()
+                .email(email)
+                .fullName(fullName)
+                .passwordHash(passwordEncoderService.encode(password))
+                .status("ACTIVE")
+                .centerId(centerId)
+                .roles(Set.of(centerAdminRole))
+                .build();
+        adminRepository.save(centerAdmin);
+    }
+
+    @Override
+    public List<UserAccount> listCenterAdmins() {
+        return adminRepository.findAllByCenterIdIsNotNull();
+    }
+
+    @Override
+    @Transactional
+    public void removeCenterAdmin(int userId) {
+        UserAccount user = adminRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException("User not found: " + userId));
+        user.getRoles().removeIf(r -> r.getRoleName().equals(RoleConstants.CENTER_ADMIN));
+        user.setCenterId(null);
+        adminRepository.save(user);
     }
 }
