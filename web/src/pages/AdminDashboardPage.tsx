@@ -7,28 +7,40 @@ import {
   ChevronRight,
   Loader2,
   LayoutDashboard,
+  UserCog,
 } from "lucide-react";
 import { adminApi } from "../api/admin";
 import { adminAppointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
+import { useAuth } from "../context/AuthContext";
 import type { AdminDashboardResponse, AppointmentResponse } from "../types";
 
 export default function AdminDashboardPage() {
+  const { isCenterAdmin, adminCenterId } = useAuth();
   const [stats, setStats] = useState<AdminDashboardResponse | null>(null);
   const [recentAppts, setRecentAppts] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      adminApi.getDashboard(),
-      adminAppointmentApi.list({ status: 0 }),
-    ])
+    const apptParams =
+      isCenterAdmin && adminCenterId
+        ? { centerId: adminCenterId, status: 0 }
+        : { status: 0 };
+
+    const fetches = isCenterAdmin
+      ? [
+          Promise.resolve({ data: { data: null } }), // skip stats for center admin
+          adminAppointmentApi.list(apptParams),
+        ]
+      : [adminApi.getDashboard(), adminAppointmentApi.list(apptParams)];
+
+    Promise.all(fetches)
       .then(([statsRes, apptsRes]) => {
-        setStats(statsRes.data.data ?? null);
-        setRecentAppts(apptsRes.data.data ?? []);
+        setStats((statsRes as any).data.data ?? null);
+        setRecentAppts((apptsRes as any).data.data ?? []);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [isCenterAdmin, adminCenterId]);
 
   if (loading)
     return (
@@ -45,39 +57,52 @@ export default function AdminDashboardPage() {
         </div>
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">
-            Admin Dashboard
+            {isCenterAdmin ? "Center Admin Dashboard" : "Admin Dashboard"}
           </h1>
           <p className="text-gray-500 text-sm">
-            Manage the healthcare platform
+            {isCenterAdmin
+              ? "Manage appointments and tests for your center"
+              : "Manage the healthcare platform"}
           </p>
         </div>
       </div>
 
       {/* Stat cards */}
       <div className="grid sm:grid-cols-3 gap-5 mb-10">
-        {[
-          {
-            label: "Diagnostic Centers",
-            value: stats?.totalCenters ?? 0,
-            icon: Building2,
-            color: "bg-blue-50 text-blue-600",
-            link: "/admin/centers",
-          },
-          {
-            label: "Diagnostic Tests",
-            value: stats?.totalTests ?? 0,
-            icon: Microscope,
-            color: "bg-indigo-50 text-indigo-600",
-            link: "/admin/tests",
-          },
-          {
-            label: "Pending Appointments",
-            value: stats?.pendingAppointments ?? 0,
-            icon: Clock,
-            color: "bg-yellow-50 text-yellow-600",
-            link: "/admin/appointments",
-          },
-        ].map(({ label, value, icon: Icon, color, link }) => (
+        {(isCenterAdmin
+          ? [
+              {
+                label: "Pending Appointments",
+                value: recentAppts.length,
+                icon: Clock,
+                color: "bg-yellow-50 text-yellow-600",
+                link: "/admin/appointments",
+              },
+            ]
+          : [
+              {
+                label: "Diagnostic Centers",
+                value: stats?.totalCenters ?? 0,
+                icon: Building2,
+                color: "bg-blue-50 text-blue-600",
+                link: "/admin/centers",
+              },
+              {
+                label: "Diagnostic Tests",
+                value: stats?.totalTests ?? 0,
+                icon: Microscope,
+                color: "bg-indigo-50 text-indigo-600",
+                link: "/admin/tests",
+              },
+              {
+                label: "Pending Appointments",
+                value: stats?.pendingAppointments ?? 0,
+                icon: Clock,
+                color: "bg-yellow-50 text-yellow-600",
+                link: "/admin/appointments",
+              },
+            ]
+        ).map(({ label, value, icon: Icon, color, link }) => (
           <Link
             key={label}
             to={link}
@@ -101,26 +126,48 @@ export default function AdminDashboardPage() {
 
       {/* Admin quick actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-        {[
-          {
-            label: "Manage Appointments",
-            desc: "Approve or reject pending appointments",
-            href: "/admin/appointments",
-            icon: Clock,
-          },
-          {
-            label: "Manage Centers",
-            desc: "Add, edit, or deactivate diagnostic centers",
-            href: "/admin/centers",
-            icon: Building2,
-          },
-          {
-            label: "Manage Tests",
-            desc: "Add and edit new tests",
-            href: "/admin/tests",
-            icon: Microscope,
-          },
-        ].map(({ label, desc, href, icon: Icon }) => (
+        {(isCenterAdmin
+          ? [
+              {
+                label: "Manage Appointments",
+                desc: "Approve or reject pending appointments",
+                href: "/admin/appointments",
+                icon: Clock,
+              },
+              {
+                label: "Center Tests",
+                desc: "Manage tests offered at your center",
+                href: "/admin/tests",
+                icon: Microscope,
+              },
+            ]
+          : [
+              {
+                label: "Manage Appointments",
+                desc: "Approve or reject pending appointments",
+                href: "/admin/appointments",
+                icon: Clock,
+              },
+              {
+                label: "Manage Centers",
+                desc: "Add, edit, or deactivate diagnostic centers",
+                href: "/admin/centers",
+                icon: Building2,
+              },
+              {
+                label: "Manage Tests",
+                desc: "Add and edit new tests",
+                href: "/admin/tests",
+                icon: Microscope,
+              },
+              {
+                label: "Center Admins",
+                desc: "Assign admins to diagnostic centers",
+                href: "/admin/center-admins",
+                icon: UserCog,
+              },
+            ]
+        ).map(({ label, desc, href, icon: Icon }) => (
           <Link
             key={label}
             to={href}

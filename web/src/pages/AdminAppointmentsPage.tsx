@@ -3,9 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Loader2, ChevronRight, Check, X, Search } from "lucide-react";
 import { adminAppointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
+import { useAuth } from "../context/AuthContext";
 import type { AppointmentResponse, ApprovalStatus } from "../types";
 
 export default function AdminAppointmentsPage() {
+  const { isCenterAdmin, adminCenterId } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +30,9 @@ export default function AdminAppointmentsPage() {
   const fetchAppointments = async (status: string) => {
     setLoading(true);
     try {
-      const params =
-        status !== "ALL" ? { status: statusCodeMap[status] } : undefined;
+      const params: { status?: number; centerId?: number } =
+        status !== "ALL" ? { status: statusCodeMap[status] } : {};
+      if (isCenterAdmin && adminCenterId) params.centerId = adminCenterId;
       const res = await adminAppointmentApi.list(params);
       setAppointments(res.data.data ?? []);
     } finally {
@@ -85,7 +88,9 @@ export default function AdminAppointmentsPage() {
           Manage Appointments
         </h1>
         <p className="text-gray-500 mt-1">
-          Review, approve, or reject patient appointment requests.
+          {isCenterAdmin
+            ? "Appointments at your center — approve or reject requests."
+            : "Review, approve, or reject patient appointment requests."}
         </p>
       </div>
 

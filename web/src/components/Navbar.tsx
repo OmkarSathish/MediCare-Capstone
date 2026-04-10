@@ -11,11 +11,12 @@ import {
   Calendar,
   Building2,
   FlaskConical,
+  UserCog,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isCenterAdmin, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
   const navigate = useNavigate();
@@ -52,6 +53,21 @@ export default function Navbar() {
                 </NavLink>
                 <NavLink to="/admin/centers" className={navLinkClass}>
                   Centers
+                </NavLink>
+                <NavLink to="/admin/tests" className={navLinkClass}>
+                  Tests
+                </NavLink>
+                <NavLink to="/admin/center-admins" className={navLinkClass}>
+                  Center Admins
+                </NavLink>
+              </>
+            ) : isCenterAdmin ? (
+              <>
+                <NavLink to="/admin" end className={navLinkClass}>
+                  Dashboard
+                </NavLink>
+                <NavLink to="/admin/appointments" className={navLinkClass}>
+                  Appointments
                 </NavLink>
                 <NavLink to="/admin/tests" className={navLinkClass}>
                   Tests
@@ -117,6 +133,37 @@ export default function Navbar() {
                           onClick={() => setDropOpen(false)}
                         >
                           <Building2 className="w-4 h-4" /> Centers
+                        </Link>
+                        <Link
+                          to="/admin/tests"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
+                          <FlaskConical className="w-4 h-4" /> Tests
+                        </Link>
+                        <Link
+                          to="/admin/center-admins"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
+                          <UserCog className="w-4 h-4" /> Center Admins
+                        </Link>
+                      </>
+                    ) : isCenterAdmin ? (
+                      <>
+                        <Link
+                          to="/admin"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
+                          <LayoutDashboard className="w-4 h-4" /> Dashboard
+                        </Link>
+                        <Link
+                          to="/admin/appointments"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => setDropOpen(false)}
+                        >
+                          <Calendar className="w-4 h-4" /> Appointments
                         </Link>
                         <Link
                           to="/admin/tests"
@@ -212,6 +259,38 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
               >
                 Centers
+              </NavLink>
+              <NavLink
+                to="/admin/tests"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Tests
+              </NavLink>
+              <NavLink
+                to="/admin/center-admins"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Center Admins
+              </NavLink>
+            </>
+          ) : isCenterAdmin ? (
+            <>
+              <NavLink
+                to="/admin"
+                end
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
+                to="/admin/appointments"
+                className={navLinkClass}
+                onClick={() => setMobileOpen(false)}
+              >
+                Appointments
               </NavLink>
               <NavLink
                 to="/admin/tests"

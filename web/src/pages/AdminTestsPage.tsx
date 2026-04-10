@@ -9,9 +9,12 @@ import {
   X,
   Check,
   Tag,
+  Minus,
 } from "lucide-react";
 import { testsApi } from "../api/tests";
-import type { TestResponse } from "../types";
+import { centersApi } from "../api/centers";
+import { useAuth } from "../context/AuthContext";
+import type { CenterTestOfferingResponse, TestResponse } from "../types";
 
 interface TestForm {
   testName: string;
@@ -28,6 +31,18 @@ const emptyForm: TestForm = {
 };
 
 export default function AdminTestsPage() {
+  const { isCenterAdmin, adminCenterId } = useAuth();
+
+  // ── Center admin state ─────────────────────────────────────────────────────
+  const [centerTests, setCenterTests] = useState<CenterTestOfferingResponse[]>(
+    [],
+  );
+  const [allCatalogTests, setAllCatalogTests] = useState<TestResponse[]>([]);
+  const [centerLoading, setCenterLoading] = useState(true);
+  const [centerSearch, setCenterSearch] = useState("");
+  const [togglingId, setTogglingId] = useState<number | null>(null);
+
+  // ── Primary admin state ────────────────────────────────────────────────────
   const [tests, setTests] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -52,6 +67,26 @@ export default function AdminTestsPage() {
   useEffect(() => {
     fetchTests();
   }, []);
+
+  // ── Center admin fetch ─────────────────────────────────────────────────────
+  const fetchCenterTests = async () => {
+    if (!adminCenterId) return;
+    setCenterLoading(true);
+    try {
+      const [centerRes, catalogRes] = await Promise.all([
+        centersApi.getTests(adminCenterId),
+        testsApi.list(),
+      ]);
+      setCenterTests(centerRes.data.data ?? []);
+      setAllCatalogTests(catalogRes.data.data ?? []);
+    } finally {
+      setCenterLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isCenterAdmin) fetchCenterTests();
+  }, [isCenterAdmin, adminCenterId]);
 
   const openCreate = () => {
     setEditingTest(null);
@@ -127,6 +162,180 @@ export default function AdminTestsPage() {
   const filtered = tests.filter((t) =>
     t.testName.toLowerCase().includes(search.toLowerCase()),
   );
+
+  // ── Center admin view (early return) ──────────────────────────────────────
+  if (isCenterAdmin) {
+    const assignedIds = new Set(centerTests.map((t) => t.testId));
+    const available = allCatalogTests.filter(
+      (t) =>
+        !assignedIds.has(t.id) &&
+        t.status === "ACTIVE" &&
+        t.testName.toLowerCase().includes(centerSearch.toLowerCase()),
+    );
+    const filteredCenter = centerTests.filter((t) =>
+      t.testName.toLowerCase().includes(centerSearch.toLowerCase()),
+    );
+
+    const handleAdd = async (testId: number) => {
+      if (!adminCenterId) return;
+      setTogglingId(testId);
+      try {
+        await centersApi.addTest(adminCenterId, testId);
+        await fetchCenterTests();
+      } catch (err: any) {
+        alert(err?.response?.data?.message ?? "Failed to add test.");
+      } finally {
+        setTogglingId(null);
+      }
+    };
+
+    const handleRemove = async (testId: number) => {
+      if (!adminCenterId) return;
+      setTogglingId(testId);
+      try {
+        await centersApi.removeTest(adminCenterId, testId);
+        await fetchCenterTests();
+      } catch (err: any) {
+        alert(err?.response?.data?.message ?? "Failed to remove test.");
+      } finally {
+        setTogglingId(null);
+      }
+    };
+
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900">
+              Center Tests
+            </h1>
+            <p className="text-gray-500 mt-1">
+              Manage the tests offered at your diagnostic center.
+            </p>
+          </div>
+        </div>
+
+        <div className="relative max-w-sm mb-8">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            className="input-field pl-9 py-2 text-sm"
+            placeholder="Search tests…"
+            value={centerSearch}
+            onChange={(e) => setCenterSearch(e.target.value)}
+          />
+        </div>
+
+        {centerLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        ) : (
+          <>
+            {/* Assigned tests */}
+            <h2 className="text-lg font-bold text-gray-800 mb-3">
+              Assigned to your center
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                ({filteredCenter.length})
+              </span>
+            </h2>
+            {filteredCenter.length === 0 ? (
+              <div className="card text-center py-10 mb-8">
+                <Microscope className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">No tests assigned yet.</p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                {filteredCenter.map((t) => (
+                  <div
+                    key={t.testId}
+                    className="card flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center shrink-0">
+                        <Microscope className="w-4 h-4 text-indigo-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm truncate">
+                          {t.testName}
+                        </p>
+                        <p className="text-blue-600 text-xs font-medium">
+                          ₹{t.testPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemove(t.testId)}
+                      disabled={togglingId === t.testId}
+                      className="shrink-0 flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    >
+                      {togglingId === t.testId ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Minus className="w-3.5 h-3.5" />
+                      )}
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Available to add */}
+            <h2 className="text-lg font-bold text-gray-800 mb-3">
+              Available to add
+              <span className="ml-2 text-sm font-normal text-gray-400">
+                ({available.length})
+              </span>
+            </h2>
+            {available.length === 0 ? (
+              <div className="card text-center py-10">
+                <Check className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">
+                  All active tests are already assigned.
+                </p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {available.map((t) => (
+                  <div
+                    key={t.id}
+                    className="card flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center shrink-0">
+                        <Microscope className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm truncate">
+                          {t.testName}
+                        </p>
+                        <p className="text-blue-600 text-xs font-medium">
+                          ₹{t.testPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleAdd(t.id)}
+                      disabled={togglingId === t.id}
+                      className="shrink-0 flex items-center gap-1 text-xs font-medium text-green-600 border border-green-200 rounded-lg px-3 py-1.5 hover:bg-green-50 transition-colors disabled:opacity-50"
+                    >
+                      {togglingId === t.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="w-3.5 h-3.5" />
+                      )}
+                      Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
