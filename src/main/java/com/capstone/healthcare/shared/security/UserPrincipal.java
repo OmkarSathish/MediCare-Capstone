@@ -14,13 +14,15 @@ public class UserPrincipal implements UserDetails {
     private final int userId;
     private final String email;
     private final String password;
+    private final Integer centerId;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    private UserPrincipal(int userId, String email, String password,
+    private UserPrincipal(int userId, String email, String password, Integer centerId,
             Collection<? extends GrantedAuthority> authorities) {
         this.userId = userId;
         this.email = email;
         this.password = password;
+        this.centerId = centerId;
         this.authorities = authorities;
     }
 
@@ -29,11 +31,16 @@ public class UserPrincipal implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
                 .collect(Collectors.toSet());
         return new UserPrincipal(
-                account.getUserId(), account.getEmail(), account.getPasswordHash(), authorities);
+                account.getUserId(), account.getEmail(), account.getPasswordHash(),
+                account.getCenterId(), authorities);
     }
 
     public int getUserId() {
         return userId;
+    }
+
+    public Integer getCenterId() {
+        return centerId;
     }
 
     @Override

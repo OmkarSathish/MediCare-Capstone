@@ -16,4 +16,5 @@ public class UserProfileResponse {
     private String email;
     private String phone;
     private Set<String> roles;
+    private Integer centerId;
 }
