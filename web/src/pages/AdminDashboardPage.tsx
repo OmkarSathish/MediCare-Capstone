@@ -115,8 +115,8 @@ export default function AdminDashboardPage() {
             icon: Building2,
           },
           {
-            label: "All Tests",
-            desc: "Browse the diagnostic test catalog",
+            label: "Manage Tests",
+            desc: "Add and edit new tests",
             href: "/admin/tests",
             icon: Microscope,
           },

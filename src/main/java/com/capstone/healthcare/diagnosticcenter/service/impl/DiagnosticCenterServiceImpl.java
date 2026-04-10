@@ -102,4 +102,14 @@ public class DiagnosticCenterServiceImpl implements IDiagnosticCenterService {
         centerRepository.save(center);
         return test;
     }
+
+    @Override
+    @Transactional
+    public void removeTest(int diagnosticCenterId, int testId) {
+        DiagnosticCenter center = getDiagnosticCenterById(diagnosticCenterId);
+        DiagnosticTest test = testRepository.findById(testId)
+                .orElseThrow(() -> new ResourceNotFoundException("DiagnosticTest", "id", testId));
+        center.getTests().remove(test);
+        centerRepository.save(center);
+    }
 }

@@ -25,4 +25,6 @@ public interface IDiagnosticCenterService {
     DiagnosticTest viewTestDetails(int diagnosticCenterId, String testName);
 
     DiagnosticTest addTest(int diagnosticCenterId, int testId);
+
+    void removeTest(int diagnosticCenterId, int testId);
 }

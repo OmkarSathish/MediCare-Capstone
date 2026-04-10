@@ -45,6 +45,9 @@ export const centersApi = {
       `/centers/${centerId}/tests/${testId}`,
     ),
 
+  removeTest: (centerId: number, testId: number) =>
+    api.delete<ApiResponse<void>>(`/centers/${centerId}/tests/${testId}`),
+
   delete: (id: number) =>
     api.delete<ApiResponse<CenterResponse>>(`/centers/${id}`),
 };
