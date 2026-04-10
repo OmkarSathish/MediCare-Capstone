@@ -67,4 +67,20 @@ public interface IAppointmentRepository extends JpaRepository<Appointment, Integ
         /** Top N most booked tests: [testName, count] */
         @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t GROUP BY t.testName ORDER BY COUNT(a) DESC")
         List<Object[]> countByTest();
+
+        // ── Center-scoped dashboard aggregations ──────────────────────────────────
+
+        /** Total appointments at a given center */
+        long countByDiagnosticCenter_Id(int centerId);
+
+        /** Per-status count at a given center */
+        long countByDiagnosticCenter_IdAndApprovalStatus(int centerId, ApprovalStatus status);
+
+        /** Appointments by month at a given center: [year, month, count] */
+        @Query("SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COUNT(a) FROM Appointment a WHERE a.diagnosticCenter.id = :centerId GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate) ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)")
+        List<Object[]> countByMonthForCenter(@Param("centerId") int centerId);
+
+        /** Top tests booked at a given center: [testName, count] */
+        @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t WHERE a.diagnosticCenter.id = :centerId GROUP BY t.testName ORDER BY COUNT(a) DESC")
+        List<Object[]> countByTestForCenter(@Param("centerId") int centerId);
 }

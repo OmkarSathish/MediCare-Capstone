@@ -146,6 +146,18 @@ export interface TestSearchResponse {
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
+export interface CenterAdminDashboardResponse {
+  centerName: string;
+  totalAppointments: number;
+  pendingAppointments: number;
+  approvedAppointments: number;
+  rejectedAppointments: number;
+  cancelledAppointments: number;
+  assignedTests: number;
+  appointmentsByMonth: Record<string, number>;
+  topTests: Record<string, number>;
+}
+
 export interface AdminDashboardResponse {
   totalCenters: number;
   totalTests: number;

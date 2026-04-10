@@ -46,6 +46,8 @@ public class SecurityConfig {
                                                 // ADMIN only
                                                 .requestMatchers("/api/admin/appointments/**")
                                                 .hasRole(RoleConstants.CENTER_ADMIN)
+                                                .requestMatchers(HttpMethod.GET, "/api/admin/dashboard/center")
+                                                .hasRole(RoleConstants.CENTER_ADMIN)
                                                 .requestMatchers("/api/admin/**").hasRole(RoleConstants.ADMIN)
                                                 .requestMatchers(HttpMethod.POST, "/api/tests/**")
                                                 .hasRole(RoleConstants.ADMIN)
