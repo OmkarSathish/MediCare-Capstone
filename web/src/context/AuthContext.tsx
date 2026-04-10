@@ -12,6 +12,8 @@ interface AuthContextValue {
   user: UserProfileResponse | null;
   loading: boolean;
   isAdmin: boolean;
+  isCenterAdmin: boolean;
+  adminCenterId: number | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refetch: () => Promise<void>;
@@ -66,10 +68,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = user?.roles?.includes("ADMIN") ?? false;
+  const isCenterAdmin = user?.roles?.includes("CENTER_ADMIN") ?? false;
+  const adminCenterId = user?.centerId ?? null;
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isAdmin, login, logout, refetch: fetchMe }}
+      value={{
+        user,
+        loading,
+        isAdmin,
+        isCenterAdmin,
+        adminCenterId,
+        login,
+        logout,
+        refetch: fetchMe,
+      }}
     >
       {children}
     </AuthContext.Provider>

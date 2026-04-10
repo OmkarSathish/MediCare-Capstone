@@ -26,6 +26,7 @@ export interface UserProfileResponse {
   email: string;
   phone?: string;
   roles: string[];
+  centerId?: number | null;
 }
 
 // ─── Patient ─────────────────────────────────────────────────────────────────

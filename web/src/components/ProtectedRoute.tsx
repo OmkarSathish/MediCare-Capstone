@@ -6,13 +6,15 @@ import { Loader2 } from "lucide-react";
 export function ProtectedRoute({
   children,
   adminOnly = false,
+  primaryAdminOnly = false,
   patientOnly = false,
 }: {
   children: ReactNode;
   adminOnly?: boolean;
+  primaryAdminOnly?: boolean;
   patientOnly?: boolean;
 }) {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isAdmin, isCenterAdmin } = useAuth();
 
   if (loading)
     return (
@@ -22,7 +24,10 @@ export function ProtectedRoute({
     );
 
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
-  if (patientOnly && isAdmin) return <Navigate to="/admin" replace />;
+  if (adminOnly && !isAdmin && !isCenterAdmin)
+    return <Navigate to="/dashboard" replace />;
+  if (primaryAdminOnly && !isAdmin) return <Navigate to="/admin" replace />;
+  if (patientOnly && (isAdmin || isCenterAdmin))
+    return <Navigate to="/admin" replace />;
   return <>{children}</>;
 }
