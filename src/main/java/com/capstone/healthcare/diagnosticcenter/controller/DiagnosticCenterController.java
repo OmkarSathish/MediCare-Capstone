@@ -7,13 +7,17 @@ import com.capstone.healthcare.diagnosticcenter.service.ICenterLookupService;
 import com.capstone.healthcare.diagnosticcenter.service.IDiagnosticCenterService;
 import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
 import com.capstone.healthcare.shared.response.ApiResponse;
+import com.capstone.healthcare.shared.security.RoleConstants;
+import com.capstone.healthcare.shared.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -125,12 +129,14 @@ public class DiagnosticCenterController {
 
         // ── POST /api/centers/{id}/tests/{testId} ─────────────────────────────────
         @PostMapping("/{id}/tests/{testId}")
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
         @Operation(summary = "Add a test to a center's offerings (admin only)")
         public ResponseEntity<ApiResponse<CenterTestOfferingResponse>> addTestToCenter(
                         @PathVariable int id,
-                        @PathVariable int testId) {
+                        @PathVariable int testId,
+                        @AuthenticationPrincipal UserPrincipal principal) {
 
+                enforceCenterOwnership(id, principal);
                 DiagnosticTest test = centerService.addTest(id, testId);
                 return ResponseEntity.status(HttpStatus.CREATED)
                                 .body(ApiResponse.ok("Test added to center", toOfferingResponse(id, test)));
@@ -139,12 +145,14 @@ public class DiagnosticCenterController {
         // ── DELETE /api/centers/{id}/tests/{testId}
         // ────────────────────────────────────
         @DeleteMapping("/{id}/tests/{testId}")
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
         @Operation(summary = "Remove a test from a center's offerings (admin only)")
         public ResponseEntity<ApiResponse<Void>> removeTestFromCenter(
                         @PathVariable int id,
-                        @PathVariable int testId) {
+                        @PathVariable int testId,
+                        @AuthenticationPrincipal UserPrincipal principal) {
 
+                enforceCenterOwnership(id, principal);
                 centerService.removeTest(id, testId);
                 return ResponseEntity.ok(ApiResponse.ok("Test removed from center", null));
         }
@@ -156,6 +164,18 @@ public class DiagnosticCenterController {
         public ResponseEntity<ApiResponse<CenterResponse>> deleteCenter(@PathVariable int id) {
                 DiagnosticCenter removed = centerService.removeDiagnosticCenter(id);
                 return ResponseEntity.ok(ApiResponse.ok("Center deactivated", toResponse(removed)));
+        }
+
+        // ── helpers ───────────────────────────────────────────────────────────────
+        private void enforceCenterOwnership(int centerId, UserPrincipal principal) {
+                boolean isCenterAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
+                if (!isCenterAdmin)
+                        return;
+                if (principal.getCenterId() == null || principal.getCenterId() != centerId) {
+                        throw new AccessDeniedException(
+                                        "You can only manage tests for your assigned center");
+                }
         }
 
         // ── mappers ───────────────────────────────────────────────────────────────

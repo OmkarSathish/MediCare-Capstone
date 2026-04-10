@@ -154,8 +154,17 @@ public class AppointmentController {
         private void enforceOwnerOrAdmin(Appointment appointment, UserPrincipal principal) {
                 boolean isAdmin = principal.getAuthorities().stream()
                                 .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_ADMIN));
-                if (!isAdmin
-                                && !appointment.getPatient().getUsername().equals(principal.getUsername())) {
+                if (isAdmin)
+                        return;
+
+                boolean isCenterAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
+                if (isCenterAdmin && principal.getCenterId() != null
+                                && appointment.getDiagnosticCenter().getId() == principal.getCenterId()) {
+                        return;
+                }
+
+                if (!appointment.getPatient().getUsername().equals(principal.getUsername())) {
                         throw new AccessDeniedException("Access denied");
                 }
         }

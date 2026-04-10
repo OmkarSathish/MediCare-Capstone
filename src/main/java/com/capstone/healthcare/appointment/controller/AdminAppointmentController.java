@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/appointments")
-@PreAuthorize("hasRole('" + RoleConstants.ADMIN + "')")
+@PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
 @RequiredArgsConstructor
 @Tag(name = "Admin — Appointments", description = "Admin approval, rejection, and filtered appointment listing")
 public class AdminAppointmentController {
@@ -34,9 +35,17 @@ public class AdminAppointmentController {
         public ResponseEntity<ApiResponse<List<AppointmentResponse>>> listAppointments(
                         @RequestParam(defaultValue = "0") int centerId,
                         @RequestParam(defaultValue = "") String test,
-                        @RequestParam(defaultValue = "-1") int status) {
+                        @RequestParam(defaultValue = "-1") int status,
+                        @AuthenticationPrincipal UserPrincipal principal) {
 
-                List<Appointment> appointments = appointmentService.getAppointmentList(centerId, test, status);
+                // CENTER_ADMIN is always scoped to their assigned center
+                boolean isCenterAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
+                int effectiveCenterId = isCenterAdmin
+                                ? (principal.getCenterId() != null ? principal.getCenterId() : 0)
+                                : centerId;
+
+                List<Appointment> appointments = appointmentService.getAppointmentList(effectiveCenterId, test, status);
                 return ResponseEntity.ok(ApiResponse.ok(
                                 appointments.stream().map(this::toResponse).toList()));
         }
@@ -49,6 +58,7 @@ public class AdminAppointmentController {
                         @Valid @RequestBody ApproveAppointmentRequest request,
                         @AuthenticationPrincipal UserPrincipal principal) {
 
+                enforceAppointmentOwnership(id, principal);
                 Appointment updated = workflowService.approveAppointment(
                                 id, principal.getUsername(), request.getRemarks());
                 return ResponseEntity.ok(ApiResponse.ok("Appointment approved", toResponse(updated)));
@@ -62,12 +72,26 @@ public class AdminAppointmentController {
                         @Valid @RequestBody RejectAppointmentRequest request,
                         @AuthenticationPrincipal UserPrincipal principal) {
 
+                enforceAppointmentOwnership(id, principal);
                 Appointment updated = workflowService.rejectAppointment(
                                 id, principal.getUsername(), request.getRemarks());
                 return ResponseEntity.ok(ApiResponse.ok("Appointment rejected", toResponse(updated)));
         }
 
-        // ── helper ────────────────────────────────────────────────────────────────
+        // ── helpers ───────────────────────────────────────────────────────────────
+        private void enforceAppointmentOwnership(int appointmentId, UserPrincipal principal) {
+                boolean isCenterAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
+                if (!isCenterAdmin)
+                        return;
+                Appointment appointment = appointmentService.viewAppointment(appointmentId);
+                if (principal.getCenterId() == null ||
+                                appointment.getDiagnosticCenter().getId() != principal.getCenterId()) {
+                        throw new AccessDeniedException(
+                                        "You can only manage appointments at your assigned center");
+                }
+        }
+
         private AppointmentResponse toResponse(Appointment a) {
                 return AppointmentResponse.builder()
                                 .id(a.getId())

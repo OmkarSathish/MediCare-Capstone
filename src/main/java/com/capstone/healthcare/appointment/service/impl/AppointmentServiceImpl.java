@@ -48,26 +48,33 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
     @Override
     public List<Appointment> getAppointmentList(int centerId, String test, int status) {
-        // When no centerId/testName filter, use efficient single-column queries
-        if (centerId == 0 && (test == null || test.isEmpty())) {
-            if (status == -1) {
-                return appointmentRepository.findAll();
-            }
-            ApprovalStatus approvalStatus = switch (status) {
-                case 1 -> ApprovalStatus.APPROVED;
-                case 2 -> ApprovalStatus.REJECTED;
-                case 3 -> ApprovalStatus.CANCELLED;
-                default -> ApprovalStatus.PENDING;
-            };
-            return appointmentRepository.findByApprovalStatus(approvalStatus);
-        }
-        // Full filter: centerId + testName + status
+        boolean hasCenterId = centerId != 0;
+        boolean hasTest = test != null && !test.isEmpty();
         ApprovalStatus approvalStatus = switch (status) {
             case 1 -> ApprovalStatus.APPROVED;
             case 2 -> ApprovalStatus.REJECTED;
             case 3 -> ApprovalStatus.CANCELLED;
-            default -> ApprovalStatus.PENDING;
+            case 0 -> ApprovalStatus.PENDING;
+            default -> null; // -1 = all statuses
         };
+
+        if (!hasCenterId && !hasTest) {
+            // No filters — return by status only (or everything)
+            if (approvalStatus == null)
+                return appointmentRepository.findAll();
+            return appointmentRepository.findByApprovalStatus(approvalStatus);
+        }
+
+        if (hasCenterId && !hasTest) {
+            // Center filter only
+            if (approvalStatus == null)
+                return appointmentRepository.findByDiagnosticCenter_Id(centerId);
+            return appointmentRepository.findByDiagnosticCenter_IdAndApprovalStatus(centerId, approvalStatus);
+        }
+
+        // centerId + testName + status (fall back to PENDING if status unrecognised)
+        if (approvalStatus == null)
+            approvalStatus = ApprovalStatus.PENDING;
         return appointmentRepository.findByCenterAndTestAndStatus(centerId, test, approvalStatus);
     }
 
