@@ -11,18 +11,26 @@ import {
   X,
   CheckCircle,
   AlertTriangle,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
-import { appointmentApi } from "../api/appointments";
+import { appointmentApi, adminAppointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
 import type { AppointmentDetailResponse } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 export default function AppointmentDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { isAdmin, isCenterAdmin, isStaffAdmin } = useAuth();
+  const isAdminRole = isAdmin || isCenterAdmin || isStaffAdmin;
   const [appt, setAppt] = useState<AppointmentDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [error, setError] = useState("");
+  const [actioning, setActioning] = useState<"approve" | "reject" | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectRemarks, setRejectRemarks] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -51,6 +59,45 @@ export default function AppointmentDetailPage() {
     }
   };
 
+  const handleApprove = async () => {
+    if (!id) return;
+    setActioning("approve");
+    try {
+      const res = await adminAppointmentApi.approve(Number(id));
+      setAppt((prev) =>
+        prev
+          ? { ...prev, approvalStatus: res.data.data!.approvalStatus }
+          : prev,
+      );
+    } catch {
+      setError("Failed to approve appointment.");
+    } finally {
+      setActioning(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!id) return;
+    setActioning("reject");
+    setShowRejectModal(false);
+    try {
+      const res = await adminAppointmentApi.reject(
+        Number(id),
+        rejectRemarks.trim() || "Rejected by admin",
+      );
+      setAppt((prev) =>
+        prev
+          ? { ...prev, approvalStatus: res.data.data!.approvalStatus }
+          : prev,
+      );
+      setRejectRemarks("");
+    } catch {
+      setError("Failed to reject appointment.");
+    } finally {
+      setActioning(null);
+    }
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -72,6 +119,46 @@ export default function AppointmentDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      {/* Reject remarks modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                <ThumbsDown className="w-5 h-5 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Reject Appointment
+              </h3>
+            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Remarks{" "}
+              <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              className="input-field resize-none h-24 text-sm"
+              placeholder="Reason for rejection…"
+              value={rejectRemarks}
+              onChange={(e) => setRejectRemarks(e.target.value)}
+            />
+            <div className="flex gap-3 justify-end mt-4">
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReject}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+              >
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cancel confirmation modal */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -137,21 +224,51 @@ export default function AppointmentDetailPage() {
               </p>
             )}
           </div>
-          {(appt.approvalStatus === "PENDING" ||
-            appt.approvalStatus === "APPROVED") && (
-            <button
-              onClick={() => setShowCancelModal(true)}
-              disabled={cancelling}
-              className="flex items-center gap-2 text-sm font-medium text-red-600 border border-red-200 rounded-xl px-4 py-2 hover:bg-red-50 transition-colors disabled:opacity-60"
-            >
-              {cancelling ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <X className="w-4 h-4" />
-              )}
-              Cancel Appointment
-            </button>
-          )}
+          {!isAdminRole &&
+            (appt.approvalStatus === "PENDING" ||
+              appt.approvalStatus === "APPROVED") && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                disabled={cancelling}
+                className="flex items-center gap-2 text-sm font-medium text-red-600 border border-red-200 rounded-xl px-4 py-2 hover:bg-red-50 transition-colors disabled:opacity-60"
+              >
+                {cancelling ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <X className="w-4 h-4" />
+                )}
+                Cancel Appointment
+              </button>
+            )}
+          {(isCenterAdmin || isStaffAdmin) &&
+            appt.approvalStatus === "PENDING" && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleApprove}
+                  disabled={actioning !== null}
+                  className="flex items-center gap-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-xl px-4 py-2 transition-colors disabled:opacity-60"
+                >
+                  {actioning === "approve" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ThumbsUp className="w-4 h-4" />
+                  )}
+                  Approve
+                </button>
+                <button
+                  onClick={() => setShowRejectModal(true)}
+                  disabled={actioning !== null}
+                  className="flex items-center gap-2 text-sm font-medium text-red-600 border border-red-200 hover:bg-red-50 rounded-xl px-4 py-2 transition-colors disabled:opacity-60"
+                >
+                  {actioning === "reject" ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ThumbsDown className="w-4 h-4" />
+                  )}
+                  Reject
+                </button>
+              </div>
+            )}
         </div>
       </div>
 

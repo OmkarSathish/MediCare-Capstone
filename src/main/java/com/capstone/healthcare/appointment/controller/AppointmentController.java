@@ -144,7 +144,10 @@ public class AppointmentController {
                         @AuthenticationPrincipal UserPrincipal principal) {
 
                 Appointment appointment = appointmentService.viewAppointment(id);
-                enforceOwnerOrAdmin(appointment, principal);
+                // Only the patient who created the appointment can cancel it
+                if (!appointment.getPatient().getUsername().equals(principal.getUsername())) {
+                        throw new AccessDeniedException("Only the patient who created this appointment can cancel it");
+                }
 
                 Appointment cancelled = workflowService.cancelAppointment(id, principal.getUsername());
                 return ResponseEntity.ok(ApiResponse.ok("Appointment cancelled", toResponse(cancelled)));
