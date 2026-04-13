@@ -530,7 +530,7 @@ export default function AdminDashboardPage() {
 
       {/* Charts row 2: By center + Top tests */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Appointments per center — horizontal bar */}
+        {/* Appointments per center — ranked list */}
         <div className="card">
           <h2 className="font-bold text-gray-900 mb-5">
             Appointments per Center
@@ -540,37 +540,49 @@ export default function AdminDashboardPage() {
               No data yet
             </div>
           ) : (
-            <ResponsiveContainer
-              width="100%"
-              height={Math.max(180, centerChartData.length * 44)}
-            >
-              <BarChart
-                data={centerChartData}
-                layout="vertical"
-                margin={{ top: 0, right: 20, left: 10, bottom: 0 }}
-              >
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: 11, fill: "#9ca3af" }}
-                  allowDecimals={false}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={140}
-                  tick={{ fontSize: 11, fill: "#374151" }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "1px solid #e5e7eb",
-                    fontSize: 12,
-                  }}
-                  formatter={(v) => [v, "Appointments"]}
-                />
-                <Bar dataKey="count" fill={BAR_COLOR} radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            (() => {
+              const max = Math.max(
+                ...centerChartData.map((d) => d.count as number),
+              );
+              return (
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                  {centerChartData.map((d, i) => (
+                    <div
+                      key={d.name}
+                      className="flex items-center gap-3 min-w-0"
+                    >
+                      {/* Rank badge */}
+                      <span
+                        className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                      ${i === 0 ? "bg-blue-600 text-white" : i === 1 ? "bg-blue-100 text-blue-700" : i === 2 ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}
+                      >
+                        {i + 1}
+                      </span>
+                      {/* Name */}
+                      <span
+                        className="w-36 shrink-0 text-xs text-gray-700 font-medium truncate"
+                        title={d.name}
+                      >
+                        {d.name}
+                      </span>
+                      {/* Progress bar */}
+                      <div className="flex-1 bg-gray-100 rounded-full h-2 min-w-0">
+                        <div
+                          className="h-2 rounded-full bg-blue-500 transition-all"
+                          style={{
+                            width: `${((d.count as number) / max) * 100}%`,
+                          }}
+                        />
+                      </div>
+                      {/* Count */}
+                      <span className="shrink-0 text-xs font-semibold text-gray-700 w-6 text-right">
+                        {d.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()
           )}
         </div>
 
