@@ -87,7 +87,7 @@ const testimonials = [
 ];
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, isAdmin, isCenterAdmin, isStaffAdmin } = useAuth();
 
   return (
     <div className="overflow-x-hidden">
@@ -120,7 +120,29 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap gap-4">
-                {user ? (
+                {isAdmin ? (
+                  <Link
+                    to="/admin"
+                    className="btn-primary bg-white text-blue-700 hover:bg-blue-50 flex items-center gap-2"
+                  >
+                    View Analytics <ArrowRight className="w-4 h-4" />
+                  </Link>
+                ) : isCenterAdmin || isStaffAdmin ? (
+                  <>
+                    <Link
+                      to="/admin"
+                      className="btn-primary bg-white text-blue-700 hover:bg-blue-50 flex items-center gap-2"
+                    >
+                      View Dashboard <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      to="/admin/appointments"
+                      className="btn-outline border-white text-white hover:bg-white hover:text-blue-700"
+                    >
+                      Manage Appointments
+                    </Link>
+                  </>
+                ) : user ? (
                   <>
                     <Link
                       to="/book"
