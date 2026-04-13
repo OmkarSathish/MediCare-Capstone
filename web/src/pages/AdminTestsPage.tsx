@@ -362,13 +362,6 @@ export default function AdminTestsPage() {
                           >
                             Use suggested ₱
                             {priceSuggestion.suggestedPrice.toFixed(2)}
-                            <span className="ml-1 text-gray-400">
-                              (
-                              {priceSuggestion.basis === "average"
-                                ? "avg of peers"
-                                : "platform floor"}
-                              )
-                            </span>
                           </button>
                         ) : null}
                         <div className="flex items-center gap-2">
