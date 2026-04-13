@@ -526,7 +526,7 @@ export default function AdminCentersPage() {
           {filtered.map((center) => (
             <div
               key={center.id}
-              className="card hover:shadow-md transition-all group"
+              className="card hover:shadow-md transition-all group flex flex-col"
             >
               {/* Card header */}
               <div className="flex items-start gap-3 mb-4">
@@ -598,7 +598,7 @@ export default function AdminCentersPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 pt-3 border-t border-gray-100 mt-auto">
                 <Link
                   to={`/centers/${center.id}`}
                   className="flex-1 text-center text-xs font-medium text-blue-600 border border-blue-100 rounded-lg px-3 py-1.5 hover:bg-blue-50 transition-colors inline-flex items-center justify-center gap-1"
