@@ -43,8 +43,6 @@ public class DiagnosticTestServiceImpl implements IDiagnosticTestService {
                 .orElseThrow(() -> new ResourceNotFoundException("DiagnosticTest", "id", test.getId()));
         existing.setTestName(test.getTestName());
         existing.setTestPrice(test.getTestPrice());
-        existing.setNormalValue(test.getNormalValue());
-        existing.setUnits(test.getUnits());
         return testRepository.save(existing);
     }
 

@@ -91,14 +91,6 @@ export default function TestsPage() {
               </div>
 
               <div className="space-y-2 text-sm text-gray-600">
-                {test.normalValue && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Normal range</span>
-                    <span className="font-medium">
-                      {test.normalValue} {test.units}
-                    </span>
-                  </div>
-                )}
                 <div className="flex justify-between pt-2 border-t border-gray-100">
                   <span className="text-gray-400">Price</span>
                   <span className="text-blue-600 font-bold">

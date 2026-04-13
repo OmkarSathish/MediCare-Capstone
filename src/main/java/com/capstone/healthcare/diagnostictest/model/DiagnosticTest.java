@@ -27,11 +27,6 @@ public class DiagnosticTest {
     @Column(name = "test_price", nullable = false)
     private double testPrice;
 
-    @Column(name = "normal_value")
-    private String normalValue;
-
-    private String units;
-
     @Column(nullable = false)
     private String status;
 

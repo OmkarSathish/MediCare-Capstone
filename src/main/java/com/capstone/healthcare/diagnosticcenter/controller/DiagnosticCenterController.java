@@ -240,8 +240,6 @@ public class DiagnosticCenterController {
                                 .testId(o.getTest().getId())
                                 .testName(o.getTest().getTestName())
                                 .testPrice(o.getPrice())
-                                .normalValue(o.getTest().getNormalValue())
-                                .units(o.getTest().getUnits())
                                 .build();
         }
 

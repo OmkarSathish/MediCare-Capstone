@@ -13,6 +13,4 @@ public class CenterTestOfferingResponse {
     private int testId;
     private String testName;
     private double testPrice;
-    private String normalValue;
-    private String units;
 }

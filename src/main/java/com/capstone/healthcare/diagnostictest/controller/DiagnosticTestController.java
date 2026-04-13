@@ -116,8 +116,6 @@ public class DiagnosticTestController {
                 .id(t.getId())
                 .testName(t.getTestName())
                 .testPrice(t.getTestPrice())
-                .normalValue(t.getNormalValue())
-                .units(t.getUnits())
                 .status(t.getStatus())
                 .categoryName(t.getCategory() != null ? t.getCategory().getCategoryName() : null)
                 .build();
@@ -134,9 +132,7 @@ public class DiagnosticTestController {
     private DiagnosticTest fromCreateRequest(CreateTestRequest req) {
         DiagnosticTest.DiagnosticTestBuilder builder = DiagnosticTest.builder()
                 .testName(req.getTestName())
-                .testPrice(req.getTestPrice())
-                .normalValue(req.getNormalValue())
-                .units(req.getUnits());
+                .testPrice(req.getTestPrice());
         if (req.getCategoryId() != null) {
             builder.category(TestCategory.builder().categoryId(req.getCategoryId()).build());
         }
@@ -148,8 +144,6 @@ public class DiagnosticTestController {
                 .id(req.getId())
                 .testName(req.getTestName())
                 .testPrice(req.getTestPrice())
-                .normalValue(req.getNormalValue())
-                .units(req.getUnits())
                 .build();
     }
 }

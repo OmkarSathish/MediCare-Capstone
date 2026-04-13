@@ -26,15 +26,11 @@ import type {
 interface TestForm {
   testName: string;
   testPrice: string;
-  normalValue: string;
-  units: string;
 }
 
 const emptyForm: TestForm = {
   testName: "",
   testPrice: "",
-  normalValue: "",
-  units: "",
 };
 
 export default function AdminTestsPage() {
@@ -136,8 +132,6 @@ export default function AdminTestsPage() {
     setForm({
       testName: test.testName,
       testPrice: String(test.testPrice),
-      normalValue: test.normalValue ?? "",
-      units: test.units ?? "",
     });
     setError("");
     setModalOpen(true);
@@ -157,15 +151,11 @@ export default function AdminTestsPage() {
         await testsApi.update(editingTest.id, {
           testName: form.testName.trim(),
           testPrice: price,
-          normalValue: form.normalValue.trim() || undefined,
-          units: form.units.trim() || undefined,
         });
       } else {
         await testsApi.create({
           testName: form.testName.trim(),
           testPrice: price,
-          normalValue: form.normalValue.trim() || undefined,
-          units: form.units.trim() || undefined,
         });
       }
       setModalOpen(false);
@@ -605,37 +595,6 @@ export default function AdminTestsPage() {
                 />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Normal Value
-                  </label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="e.g. 4.5–11.0"
-                    value={form.normalValue}
-                    onChange={(e) =>
-                      setForm({ ...form, normalValue: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Units
-                  </label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="e.g. ×10⁹/L"
-                    value={form.units}
-                    onChange={(e) =>
-                      setForm({ ...form, units: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
               <div className="flex gap-3 pt-2 justify-end">
                 <button
                   type="button"
@@ -708,18 +667,9 @@ export default function AdminTestsPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-400">Price</span>
                   <span className="font-bold text-blue-600">
-                    ₹{test.testPrice.toFixed(2)}
+                    ₱{test.testPrice.toFixed(2)}
                   </span>
                 </div>
-                {test.normalValue && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Normal range</span>
-                    <span className="text-gray-700 font-medium">
-                      {test.normalValue}
-                      {test.units ? ` ${test.units}` : ""}
-                    </span>
-                  </div>
-                )}
                 {test.categoryName && (
                   <div className="flex items-center gap-1.5 pt-1">
                     <Tag className="w-3.5 h-3.5 text-gray-400" />

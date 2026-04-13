@@ -18,8 +18,4 @@ public class UpdateTestRequest {
 
     @Positive
     private double testPrice;
-
-    private String normalValue;
-
-    private String units;
 }

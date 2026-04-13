@@ -287,11 +287,6 @@ export default function BookAppointmentPage() {
                       <p className="font-semibold text-gray-900 text-sm">
                         {t.testName}
                       </p>
-                      {t.normalValue && (
-                        <p className="text-xs text-gray-400">
-                          Normal: {t.normalValue} {t.units}
-                        </p>
-                      )}
                     </div>
                     <span className="text-blue-600 font-bold text-sm shrink-0">
                       ₹{t.testPrice.toFixed(2)}

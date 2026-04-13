@@ -122,8 +122,6 @@ export interface CenterTestOfferingResponse {
   testId: number;
   testName: string;
   testPrice: number;
-  normalValue?: string;
-  units?: string;
 }
 
 // ─── Diagnostic Tests ─────────────────────────────────────────────────────────
@@ -132,8 +130,6 @@ export interface TestResponse {
   id: number;
   testName: string;
   testPrice: number;
-  normalValue?: string;
-  units?: string;
   status: string;
   categoryName?: string;
 }

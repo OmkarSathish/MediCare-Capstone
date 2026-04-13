@@ -17,9 +17,5 @@ public class CreateTestRequest {
     @Positive
     private double testPrice;
 
-    private String normalValue;
-
-    private String units;
-
     private Integer categoryId;
 }

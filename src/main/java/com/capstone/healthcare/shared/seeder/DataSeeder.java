@@ -113,76 +113,63 @@ public class DataSeeder implements CommandLineRunner {
                 // ── 4. Diagnostic tests (45 total) ────────────────────────────────────
 
                 // Hematology (8)
-                DiagnosticTest cbc = t("Complete Blood Count (CBC)", 350, "RBC: 4.5-5.5 M/uL", "M/uL", hematology);
-                DiagnosticTest wbcDiff = t("White Blood Cell Differential", 200, "4.5-11.0 K/uL", "K/uL", hematology);
-                DiagnosticTest esr = t("Erythrocyte Sedimentation Rate (ESR)", 180, "0-20 mm/hr", "mm/hr", hematology);
-                DiagnosticTest hba1c = t("Hemoglobin A1c", 420, "4.0-5.6%", "%", hematology);
-                DiagnosticTest reticulocyte = t("Reticulocyte Count", 250, "0.5-2.5%", "%", hematology);
-                DiagnosticTest coagulation = t("Coagulation Panel (PT/PTT/INR)", 550, "PT: 10-13 sec", "sec",
-                                hematology);
-                DiagnosticTest platelet = t("Platelet Count", 180, "150-400 K/uL", "K/uL", hematology);
-                DiagnosticTest bloodType = t("Blood Typing & Cross-matching", 300, "ABO/Rh", "type", hematology);
+                DiagnosticTest cbc = t("Complete Blood Count (CBC)", 350, hematology);
+                DiagnosticTest wbcDiff = t("White Blood Cell Differential", 200, hematology);
+                DiagnosticTest esr = t("Erythrocyte Sedimentation Rate (ESR)", 180, hematology);
+                DiagnosticTest hba1c = t("Hemoglobin A1c", 420, hematology);
+                DiagnosticTest reticulocyte = t("Reticulocyte Count", 250, hematology);
+                DiagnosticTest coagulation = t("Coagulation Panel (PT/PTT/INR)", 550, hematology);
+                DiagnosticTest platelet = t("Platelet Count", 180, hematology);
+                DiagnosticTest bloodType = t("Blood Typing & Cross-matching", 300, hematology);
 
                 // Biochemistry (9)
-                DiagnosticTest bmp = t("Basic Metabolic Panel (BMP)", 500, "Glucose: 70-100 mg/dL", "mg/dL",
-                                biochemistry);
-                DiagnosticTest cmp = t("Comprehensive Metabolic Panel (CMP)", 700, "ALT: 7-56 U/L", "U/L",
-                                biochemistry);
-                DiagnosticTest lipid = t("Lipid Panel", 450, "Total Cholesterol <200", "mg/dL", biochemistry);
-                DiagnosticTest thyroid = t("Thyroid Panel (TSH/T3/T4)", 650, "TSH: 0.4-4.0 mIU/L", "mIU/L",
-                                biochemistry);
-                DiagnosticTest liverFunc = t("Liver Function Tests (LFT)", 600, "ALT: 7-56 U/L", "U/L", biochemistry);
-                DiagnosticTest kidneyFunc = t("Kidney Function Tests (KFT/BUN/Creat)", 550, "Creatinine: 0.7-1.3 mg/dL",
-                                "mg/dL", biochemistry);
-                DiagnosticTest uricAcid = t("Uric Acid", 220, "3.5-7.2 mg/dL", "mg/dL", biochemistry);
-                DiagnosticTest glucose = t("Fasting Blood Glucose (FBG)", 150, "70-100 mg/dL", "mg/dL", biochemistry);
-                DiagnosticTest hsCRP = t("High-Sensitivity C-Reactive Protein", 380, "<1.0 mg/L low risk", "mg/L",
-                                biochemistry);
+                DiagnosticTest bmp = t("Basic Metabolic Panel (BMP)", 500, biochemistry);
+                DiagnosticTest cmp = t("Comprehensive Metabolic Panel (CMP)", 700, biochemistry);
+                DiagnosticTest lipid = t("Lipid Panel", 450, biochemistry);
+                DiagnosticTest thyroid = t("Thyroid Panel (TSH/T3/T4)", 650, biochemistry);
+                DiagnosticTest liverFunc = t("Liver Function Tests (LFT)", 600, biochemistry);
+                DiagnosticTest kidneyFunc = t("Kidney Function Tests (KFT/BUN/Creat)", 550, biochemistry);
+                DiagnosticTest uricAcid = t("Uric Acid", 220, biochemistry);
+                DiagnosticTest glucose = t("Fasting Blood Glucose (FBG)", 150, biochemistry);
+                DiagnosticTest hsCRP = t("High-Sensitivity C-Reactive Protein", 380, biochemistry);
 
                 // Microbiology (6)
-                DiagnosticTest urinalysis = t("Urinalysis (Complete)", 150, "pH: 4.5-8.5", "pH", microbiology);
-                DiagnosticTest urineCulture = t("Urine Culture & Sensitivity", 480, "No growth", "CFU/mL",
-                                microbiology);
-                DiagnosticTest stoolExam = t("Fecalysis / Stool Examination", 120, "No ova/parasites", "—",
-                                microbiology);
-                DiagnosticTest throatSwab = t("Throat Swab Culture", 350, "No pathogen isolated", "—", microbiology);
-                DiagnosticTest woundCulture = t("Wound Culture & Sensitivity", 520, "No growth", "CFU/mL",
-                                microbiology);
-                DiagnosticTest tb = t("Tuberculosis (TB) Detection (GeneXpert)", 800, "Not detected", "—",
-                                microbiology);
+                DiagnosticTest urinalysis = t("Urinalysis (Complete)", 150, microbiology);
+                DiagnosticTest urineCulture = t("Urine Culture & Sensitivity", 480, microbiology);
+                DiagnosticTest stoolExam = t("Fecalysis / Stool Examination", 120, microbiology);
+                DiagnosticTest throatSwab = t("Throat Swab Culture", 350, microbiology);
+                DiagnosticTest woundCulture = t("Wound Culture & Sensitivity", 520, microbiology);
+                DiagnosticTest tb = t("Tuberculosis (TB) Detection (GeneXpert)", 800, microbiology);
 
                 // Immunology (6)
-                DiagnosticTest hivTest = t("HIV 1&2 Antibody Test", 500, "Non-reactive", "—", immunology);
-                DiagnosticTest hepatitisB = t("Hepatitis B Surface Antigen (HBsAg)", 350, "Non-reactive", "—",
-                                immunology);
-                DiagnosticTest hepatitisC = t("Hepatitis C Antibody (Anti-HCV)", 400, "Non-reactive", "—", immunology);
-                DiagnosticTest dengue = t("Dengue NS1 Antigen & IgG/IgM", 650, "Non-reactive", "—", immunology);
-                DiagnosticTest covid = t("COVID-19 RT-PCR Test", 900, "Not detected", "—", immunology);
-                DiagnosticTest aso = t("ASO Titer (Anti-Streptolysin O)", 420, "<200 IU/mL", "IU/mL", immunology);
+                DiagnosticTest hivTest = t("HIV 1&2 Antibody Test", 500, immunology);
+                DiagnosticTest hepatitisB = t("Hepatitis B Surface Antigen (HBsAg)", 350, immunology);
+                DiagnosticTest hepatitisC = t("Hepatitis C Antibody (Anti-HCV)", 400, immunology);
+                DiagnosticTest dengue = t("Dengue NS1 Antigen & IgG/IgM", 650, immunology);
+                DiagnosticTest covid = t("COVID-19 RT-PCR Test", 900, immunology);
+                DiagnosticTest aso = t("ASO Titer (Anti-Streptolysin O)", 420, immunology);
 
                 // Radiology (5)
-                DiagnosticTest chestXray = t("Chest X-Ray (PA View)", 500, "Clear lung fields", "—", radiology);
-                DiagnosticTest abdominalXray = t("Abdominal X-Ray (KUB)", 650, "No abnormality detected", "—",
-                                radiology);
-                DiagnosticTest boneXray = t("Bone X-Ray", 600, "No fracture", "—", radiology);
-                DiagnosticTest ultrasound = t("Abdominal Ultrasound", 1200, "Normal echogenicity", "—", radiology);
-                DiagnosticTest mri = t("MRI Brain (Plain)", 5500, "No intracranial lesion", "—", radiology);
+                DiagnosticTest chestXray = t("Chest X-Ray (PA View)", 500, radiology);
+                DiagnosticTest abdominalXray = t("Abdominal X-Ray (KUB)", 650, radiology);
+                DiagnosticTest boneXray = t("Bone X-Ray", 600, radiology);
+                DiagnosticTest ultrasound = t("Abdominal Ultrasound", 1200, radiology);
+                DiagnosticTest mri = t("MRI Brain (Plain)", 5500, radiology);
 
                 // Pathology (5)
-                DiagnosticTest papSmear = t("Pap Smear / Cervical Cytology", 600, "NILM — No lesion", "—", pathology);
-                DiagnosticTest biopsy = t("Tissue Biopsy (Routine H&E)", 1800, "No malignancy", "—", pathology);
-                DiagnosticTest fnab = t("Fine Needle Aspiration Biopsy (FNAB)", 1500, "No malignancy", "—", pathology);
-                DiagnosticTest urineHisto = t("Urine Cytology", 850, "No malignant cells", "—", pathology);
-                DiagnosticTest semenAnalysis = t("Semen Analysis", 750, "Vol ≥1.5 mL, Motility ≥40%", "—", pathology);
+                DiagnosticTest papSmear = t("Pap Smear / Cervical Cytology", 600, pathology);
+                DiagnosticTest biopsy = t("Tissue Biopsy (Routine H&E)", 1800, pathology);
+                DiagnosticTest fnab = t("Fine Needle Aspiration Biopsy (FNAB)", 1500, pathology);
+                DiagnosticTest urineHisto = t("Urine Cytology", 850, pathology);
+                DiagnosticTest semenAnalysis = t("Semen Analysis", 750, pathology);
 
                 // Cardiology (6)
-                DiagnosticTest ecg = t("12-Lead Electrocardiogram (ECG)", 450, "Normal sinus rhythm", "—", cardiology);
-                DiagnosticTest echo = t("2D Echocardiography", 3500, "Normal cardiac function", "—", cardiology);
-                DiagnosticTest holter = t("24-Hour Holter Monitor", 2800, "No significant arrhythmia", "—", cardiology);
-                DiagnosticTest troponin = t("Troponin I / T", 700, "<0.04 ng/mL", "ng/mL", cardiology);
-                DiagnosticTest bnp = t("Brain Natriuretic Peptide (BNP)", 950, "<100 pg/mL", "pg/mL", cardiology);
-                DiagnosticTest stressTest = t("Treadmill Stress Test (TMT)", 2500, "Negative for ischemia", "—",
-                                cardiology);
+                DiagnosticTest ecg = t("12-Lead Electrocardiogram (ECG)", 450, cardiology);
+                DiagnosticTest echo = t("2D Echocardiography", 3500, cardiology);
+                DiagnosticTest holter = t("24-Hour Holter Monitor", 2800, cardiology);
+                DiagnosticTest troponin = t("Troponin I / T", 700, cardiology);
+                DiagnosticTest bnp = t("Brain Natriuretic Peptide (BNP)", 950, cardiology);
+                DiagnosticTest stressTest = t("Treadmill Stress Test (TMT)", 2500, cardiology);
 
                 List<DiagnosticTest> allTests = testRepository.saveAll(List.of(
                                 cbc, wbcDiff, esr, hba1c, reticulocyte, coagulation, platelet, bloodType,
@@ -478,12 +465,10 @@ public class DataSeeder implements CommandLineRunner {
                 return TestCategory.builder().categoryName(name).description(desc).build();
         }
 
-        private DiagnosticTest t(String name, double price, String normal, String units, TestCategory cat) {
+        private DiagnosticTest t(String name, double price, TestCategory cat) {
                 return DiagnosticTest.builder()
                                 .testName(name)
                                 .testPrice(price)
-                                .normalValue(normal)
-                                .units(units)
                                 .status("ACTIVE")
                                 .category(cat)
                                 .build();

@@ -15,8 +15,6 @@ export const testsApi = {
   create: (data: {
     testName: string;
     testPrice: number;
-    normalValue?: string;
-    units?: string;
     categoryId?: number;
   }) => api.post<ApiResponse<TestResponse>>("/tests", data),
 
@@ -25,8 +23,6 @@ export const testsApi = {
     data: {
       testName: string;
       testPrice: number;
-      normalValue?: string;
-      units?: string;
     },
   ) => api.put<ApiResponse<TestResponse>>(`/tests/${id}`, data),
 
