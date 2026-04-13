@@ -358,35 +358,50 @@ export default function AdminCenterAdminsPage() {
 
                       {/* Admin list */}
                       <div className="divide-y divide-gray-100 border-t border-gray-100">
-                        {admins.map((admin) => (
-                          <div
-                            key={admin.userId}
-                            className="flex items-center justify-between gap-3 pt-3 first:pt-3"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                                <span className="text-blue-600 font-bold text-xs">
-                                  {admin.fullName.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 text-sm truncate">
-                                  {admin.fullName}
-                                </p>
-                                <p className="text-gray-400 text-xs truncate">
-                                  {admin.email}
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => setConfirmRemoveId(admin.userId)}
-                              className="shrink-0 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Remove this admin"
+                        {admins.map((admin) => {
+                          const isMainAdmin =
+                            admin.roles?.includes("CENTER_ADMIN");
+                          return (
+                            <div
+                              key={admin.userId}
+                              className="flex items-center justify-between gap-3 pt-3 first:pt-3"
                             >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div
+                                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isMainAdmin ? "bg-blue-100" : "bg-indigo-50"}`}
+                                >
+                                  <span
+                                    className={`font-bold text-xs ${isMainAdmin ? "text-blue-600" : "text-indigo-400"}`}
+                                  >
+                                    {admin.fullName.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="font-semibold text-gray-900 text-sm truncate">
+                                      {admin.fullName}
+                                    </p>
+                                    <span
+                                      className={`shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${isMainAdmin ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"}`}
+                                    >
+                                      {isMainAdmin ? "Admin" : "Staff"}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-400 text-xs truncate">
+                                    {admin.email}
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => setConfirmRemoveId(admin.userId)}
+                                className="shrink-0 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Remove this admin"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
