@@ -78,6 +78,7 @@ public class DataSeeder implements CommandLineRunner {
                 Role customerRole = roleRepository.save(Role.builder().roleName(RoleConstants.CUSTOMER).build());
                 Role adminRole = roleRepository.save(Role.builder().roleName(RoleConstants.ADMIN).build());
                 Role centerAdminRole = roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_ADMIN).build());
+                Role centerStaffRole = roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_STAFF).build());
 
                 // ── 2. Primary admin ──────────────────────────────────────────────────
                 userRepository.save(UserAccount.builder()
@@ -324,20 +325,44 @@ public class DataSeeder implements CommandLineRunner {
                                                 .build());
                         }
 
-                        // Center admin account
-                        String adminEmail = "admin." + s.slug() + "@healthcare.ph";
-                        String adminName = s.city() + " Admin";
-                        userRepository.save(UserAccount.builder()
-                                        .fullName(adminName)
-                                        .email(adminEmail)
-                                        .phone("09" + String.format("%09d", 100000000L + i))
-                                        .passwordHash(passwordEncoderService.encode("admin@1234"))
-                                        .status("ACTIVE")
-                                        .centerId(center.getId())
-                                        .roles(Set.of(centerAdminRole))
-                                        .build());
+                        // 1–2 center admins per center
+                        int adminCount = 1 + rng.nextInt(2);
+                        for (int a = 0; a < adminCount; a++) {
+                                String adminEmail = (a == 0 ? "admin." : "admin" + (a + 1) + ".") + s.slug()
+                                                + "@healthcare.ph";
+                                String adminName = (a == 0 ? "" : "Deputy ") + s.city() + " Admin";
+                                userRepository.save(UserAccount.builder()
+                                                .fullName(adminName)
+                                                .email(adminEmail)
+                                                .phone("09" + String.format("%09d", 100000000L + i * 10 + a))
+                                                .passwordHash(passwordEncoderService.encode("admin@1234"))
+                                                .status("ACTIVE")
+                                                .centerId(center.getId())
+                                                .roles(Set.of(centerAdminRole))
+                                                .build());
+                                log.info("[DataSeeder] Center: {} | Admin {}: {}", center.getName(), a + 1, adminEmail);
+                        }
 
-                        log.info("[DataSeeder] Center: {} | Admin: {}", center.getName(), adminEmail);
+                        // 4–5 center staff per center
+                        int staffCount = 4 + rng.nextInt(2);
+                        String[] staffFirstNames = { "Alex", "Blake", "Casey", "Dana", "Eden", "Finley", "Harper",
+                                        "Jamie", "Kerry", "Logan" };
+                        for (int st = 0; st < staffCount; st++) {
+                                String staffEmail = "staff" + (st + 1) + "." + s.slug() + "@healthcare.ph";
+                                String staffName = staffFirstNames[(i * 5 + st) % staffFirstNames.length] + " "
+                                                + s.city() + " Staff";
+                                userRepository.save(UserAccount.builder()
+                                                .fullName(staffName)
+                                                .email(staffEmail)
+                                                .phone("09" + String.format("%09d", 300000000L + i * 10 + st))
+                                                .passwordHash(passwordEncoderService.encode("staff@1234"))
+                                                .status("ACTIVE")
+                                                .centerId(center.getId())
+                                                .roles(Set.of(centerStaffRole))
+                                                .build());
+                                log.info("[DataSeeder] Center: {} | Staff {}: {}", center.getName(), st + 1,
+                                                staffEmail);
+                        }
                 }
 
                 log.info("[DataSeeder] Created {} centers with center admins", centers.size());
