@@ -1,5 +1,5 @@
 import api from "./axios";
-import type { ApiResponse, TestResponse } from "../types";
+import type { ApiResponse, TestPriceEntry, TestResponse } from "../types";
 
 export const testsApi = {
   list: (search?: string) =>
@@ -31,4 +31,7 @@ export const testsApi = {
   ) => api.put<ApiResponse<TestResponse>>(`/tests/${id}`, data),
 
   delete: (id: number) => api.delete<ApiResponse<TestResponse>>(`/tests/${id}`),
+
+  getPrices: (testId: number) =>
+    api.get<ApiResponse<TestPriceEntry[]>>(`/tests/${testId}/prices`),
 };

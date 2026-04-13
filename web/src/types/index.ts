@@ -173,6 +173,19 @@ export interface AdminDashboardResponse {
   topTests: Record<string, number>;
 }
 
+// ─── Pricing ──────────────────────────────────────────────────────────────────
+
+export interface TestPriceEntry {
+  centerId: number;
+  centerName: string;
+  price: number;
+}
+
+export interface SuggestedPriceResponse {
+  suggestedPrice: number;
+  basis: "average" | "platform_floor";
+}
+
 // ─── API Wrapper ──────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {

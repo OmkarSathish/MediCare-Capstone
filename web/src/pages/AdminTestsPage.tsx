@@ -10,11 +10,18 @@ import {
   Check,
   Tag,
   Minus,
+  DollarSign,
+  BarChart2,
 } from "lucide-react";
 import { testsApi } from "../api/tests";
 import { centersApi } from "../api/centers";
 import { useAuth } from "../context/AuthContext";
-import type { CenterTestOfferingResponse, TestResponse } from "../types";
+import type {
+  CenterTestOfferingResponse,
+  SuggestedPriceResponse,
+  TestPriceEntry,
+  TestResponse,
+} from "../types";
 
 interface TestForm {
   testName: string;
@@ -42,6 +49,16 @@ export default function AdminTestsPage() {
   const [centerSearch, setCenterSearch] = useState("");
   const [togglingId, setTogglingId] = useState<number | null>(null);
 
+  // price editing state
+  const [editingPriceTestId, setEditingPriceTestId] = useState<number | null>(
+    null,
+  );
+  const [priceInput, setPriceInput] = useState("");
+  const [priceSuggestion, setPriceSuggestion] =
+    useState<SuggestedPriceResponse | null>(null);
+  const [priceSaving, setPriceSaving] = useState(false);
+  const [priceLoadingId, setPriceLoadingId] = useState<number | null>(null);
+
   // ── Primary admin state ────────────────────────────────────────────────────
   const [tests, setTests] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +70,25 @@ export default function AdminTestsPage() {
   const [error, setError] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // prices modal
+  const [pricesTest, setPricesTest] = useState<TestResponse | null>(null);
+  const [pricesList, setPricesList] = useState<TestPriceEntry[]>([]);
+  const [pricesLoading, setPricesLoading] = useState(false);
+
+  const openPricesModal = async (test: TestResponse) => {
+    setPricesTest(test);
+    setPricesList([]);
+    setPricesLoading(true);
+    try {
+      const res = await testsApi.getPrices(test.id);
+      setPricesList(res.data.data ?? []);
+    } catch {
+      // silently ignore
+    } finally {
+      setPricesLoading(false);
+    }
+  };
 
   const fetchTests = async () => {
     setLoading(true);
@@ -180,7 +216,13 @@ export default function AdminTestsPage() {
       if (!adminCenterId) return;
       setTogglingId(testId);
       try {
-        await centersApi.addTest(adminCenterId, testId);
+        // fetch suggested price first for new additions
+        const sugRes = await centersApi.getSuggestedPrice(
+          adminCenterId,
+          testId,
+        );
+        const suggested = sugRes.data.data?.suggestedPrice ?? 0;
+        await centersApi.addTest(adminCenterId, testId, suggested);
         await fetchCenterTests();
       } catch (err: any) {
         alert(err?.response?.data?.message ?? "Failed to add test.");
@@ -194,11 +236,44 @@ export default function AdminTestsPage() {
       setTogglingId(testId);
       try {
         await centersApi.removeTest(adminCenterId, testId);
+        if (editingPriceTestId === testId) setEditingPriceTestId(null);
         await fetchCenterTests();
       } catch (err: any) {
         alert(err?.response?.data?.message ?? "Failed to remove test.");
       } finally {
         setTogglingId(null);
+      }
+    };
+
+    const openPriceEdit = async (testId: number, currentPrice: number) => {
+      if (!adminCenterId) return;
+      setEditingPriceTestId(testId);
+      setPriceInput(String(currentPrice));
+      setPriceSuggestion(null);
+      setPriceLoadingId(testId);
+      try {
+        const res = await centersApi.getSuggestedPrice(adminCenterId, testId);
+        setPriceSuggestion(res.data.data ?? null);
+      } catch {
+        // suggestion is optional
+      } finally {
+        setPriceLoadingId(null);
+      }
+    };
+
+    const handlePriceSave = async (testId: number) => {
+      if (!adminCenterId) return;
+      const price = parseFloat(priceInput);
+      if (isNaN(price) || price <= 0) return;
+      setPriceSaving(true);
+      try {
+        await centersApi.updatePrice(adminCenterId, testId, price);
+        await fetchCenterTests();
+        setEditingPriceTestId(null);
+      } catch (err: any) {
+        alert(err?.response?.data?.message ?? "Failed to update price.");
+      } finally {
+        setPriceSaving(false);
       }
     };
 
@@ -247,35 +322,104 @@ export default function AdminTestsPage() {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {filteredCenter.map((t) => (
-                  <div
-                    key={t.testId}
-                    className="card flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center shrink-0">
-                        <Microscope className="w-4 h-4 text-indigo-600" />
+                  <div key={t.testId} className="card flex flex-col gap-3">
+                    {/* Test info row */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center shrink-0">
+                          <Microscope className="w-4 h-4 text-indigo-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-gray-900 text-sm truncate">
+                            {t.testName}
+                          </p>
+                          <p className="text-blue-600 text-xs font-medium">
+                            ₱{t.testPrice.toFixed(2)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">
-                          {t.testName}
-                        </p>
-                        <p className="text-blue-600 text-xs font-medium">
-                          ₹{t.testPrice.toFixed(2)}
-                        </p>
-                      </div>
+                      <button
+                        onClick={() => handleRemove(t.testId)}
+                        disabled={togglingId === t.testId}
+                        className="shrink-0 flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      >
+                        {togglingId === t.testId ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Minus className="w-3.5 h-3.5" />
+                        )}
+                        Remove
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleRemove(t.testId)}
-                      disabled={togglingId === t.testId}
-                      className="shrink-0 flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-50"
-                    >
-                      {togglingId === t.testId ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Minus className="w-3.5 h-3.5" />
-                      )}
-                      Remove
-                    </button>
+
+                    {/* Price editing row */}
+                    {editingPriceTestId === t.testId ? (
+                      <div className="border-t pt-3 space-y-2">
+                        {priceLoadingId === t.testId ? (
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Loading suggestion…
+                          </div>
+                        ) : priceSuggestion ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPriceInput(
+                                String(priceSuggestion.suggestedPrice),
+                              )
+                            }
+                            className="text-xs text-indigo-600 hover:underline"
+                          >
+                            Use suggested ₱
+                            {priceSuggestion.suggestedPrice.toFixed(2)}
+                            <span className="ml-1 text-gray-400">
+                              (
+                              {priceSuggestion.basis === "average"
+                                ? "avg of peers"
+                                : "platform floor"}
+                              )
+                            </span>
+                          </button>
+                        ) : null}
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400 text-sm">₱</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="10"
+                            className="input-field py-1.5 text-sm flex-1"
+                            value={priceInput}
+                            onChange={(e) => setPriceInput(e.target.value)}
+                          />
+                          <button
+                            onClick={() => handlePriceSave(t.testId)}
+                            disabled={priceSaving}
+                            className="shrink-0 flex items-center gap-1 text-xs font-medium text-white bg-indigo-600 rounded-lg px-3 py-1.5 hover:bg-indigo-700 disabled:opacity-50"
+                          >
+                            {priceSaving ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Check className="w-3.5 h-3.5" />
+                            )}
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingPriceTestId(null)}
+                            className="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => openPriceEdit(t.testId, t.testPrice)}
+                        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors border-t pt-3 w-fit"
+                      >
+                        <DollarSign className="w-3.5 h-3.5" />
+                        Edit price
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -311,7 +455,7 @@ export default function AdminTestsPage() {
                           {t.testName}
                         </p>
                         <p className="text-blue-600 text-xs font-medium">
-                          ₹{t.testPrice.toFixed(2)}
+                          ₱{t.testPrice.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -595,6 +739,13 @@ export default function AdminTestsPage() {
                   <Edit2 className="w-3.5 h-3.5" /> Edit
                 </button>
                 <button
+                  onClick={() => openPricesModal(test)}
+                  className="flex items-center gap-1 text-xs font-medium text-indigo-600 border border-indigo-100 rounded-lg px-3 py-1.5 hover:bg-indigo-50 transition-colors"
+                  title="Check Prices"
+                >
+                  <BarChart2 className="w-3.5 h-3.5" />
+                </button>
+                <button
                   onClick={() => setDeleteId(test.id)}
                   className="flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors"
                 >
@@ -603,6 +754,83 @@ export default function AdminTestsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Prices modal */}
+      {pricesTest && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-900 text-lg truncate">
+                  {pricesTest.testName}
+                </h3>
+                <p className="text-sm text-gray-400">
+                  Default price: ₱{pricesTest.testPrice.toFixed(2)}
+                </p>
+              </div>
+              <button
+                onClick={() => setPricesTest(null)}
+                className="ml-4 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {pricesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              </div>
+            ) : pricesList.length === 0 ? (
+              <div className="text-center py-8">
+                <DollarSign className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">
+                  No center offers this test yet.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-80 overflow-y-auto">
+                {pricesList.map((entry, idx) => (
+                  <div
+                    key={entry.centerId}
+                    className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-gray-50"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shrink-0 ${
+                          idx === 0
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-500"
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                      <span className="text-sm font-medium text-gray-800 truncate">
+                        {entry.centerName}
+                      </span>
+                    </div>
+                    <span
+                      className={`font-bold text-sm shrink-0 ml-3 ${
+                        idx === 0 ? "text-green-600" : "text-gray-700"
+                      }`}
+                    >
+                      ₱{entry.price.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setPricesTest(null)}
+                className="btn-outline text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
