@@ -40,7 +40,7 @@ const BAR_COLOR = "#3b82f6";
 const LINE_COLOR = "#6366f1";
 
 export default function AdminDashboardPage() {
-  const { isCenterAdmin, adminCenterId } = useAuth();
+  const { isCenterAdmin, isStaffAdmin, adminCenterId } = useAuth();
   const [stats, setStats] = useState<AdminDashboardResponse | null>(null);
   const [centerStats, setCenterStats] =
     useState<CenterAdminDashboardResponse | null>(null);
@@ -48,7 +48,7 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isCenterAdmin) {
+    if (isCenterAdmin || isStaffAdmin) {
       adminApi
         .getCenterDashboard()
         .then((r) => setCenterStats(r.data.data ?? null))
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
         .catch(() => setError("Failed to load dashboard data."))
         .finally(() => setLoading(false));
     }
-  }, [isCenterAdmin, adminCenterId]);
+  }, [isCenterAdmin, isStaffAdmin, adminCenterId]);
 
   if (loading)
     return (
@@ -79,8 +79,8 @@ export default function AdminDashboardPage() {
       </div>
     );
 
-  // ── CENTER ADMIN VIEW ──────────────────────────────────────────────────────
-  if (isCenterAdmin) {
+  // ── CENTER ADMIN / STAFF VIEW ─────────────────────────────────────────────
+  if (isCenterAdmin || isStaffAdmin) {
     const cs = centerStats;
 
     const centerStatusData = [

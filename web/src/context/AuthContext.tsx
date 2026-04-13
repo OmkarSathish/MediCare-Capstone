@@ -13,6 +13,7 @@ interface AuthContextValue {
   loading: boolean;
   isAdmin: boolean;
   isCenterAdmin: boolean;
+  isStaffAdmin: boolean;
   adminCenterId: number | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -69,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isAdmin = user?.roles?.includes("ADMIN") ?? false;
   const isCenterAdmin = user?.roles?.includes("CENTER_ADMIN") ?? false;
+  const isStaffAdmin = user?.roles?.includes("CENTER_STAFF") ?? false;
   const adminCenterId = user?.centerId ?? null;
 
   return (
@@ -78,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         isAdmin,
         isCenterAdmin,
+        isStaffAdmin,
         adminCenterId,
         login,
         logout,

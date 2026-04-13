@@ -36,4 +36,16 @@ export const authApi = {
 
   removeCenterAdmin: (userId: number) =>
     api.delete<ApiResponse<void>>(`/auth/admin/center-admins/${userId}`),
+
+  listCenterStaff: () =>
+    api.get<ApiResponse<UserProfileResponse[]>>("/auth/center-admin/staff"),
+
+  createCenterStaff: (data: {
+    fullName: string;
+    email: string;
+    password: string;
+  }) => api.post<ApiResponse<void>>("/auth/center-admin/staff", data),
+
+  removeCenterStaff: (userId: number) =>
+    api.delete<ApiResponse<void>>(`/auth/center-admin/staff/${userId}`),
 };

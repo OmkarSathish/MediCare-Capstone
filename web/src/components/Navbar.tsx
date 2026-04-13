@@ -16,7 +16,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  const { user, isAdmin, isCenterAdmin, logout } = useAuth();
+  const { user, isAdmin, isCenterAdmin, isStaffAdmin, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function Navbar() {
                   Center Admins
                 </NavLink>
               </>
-            ) : isCenterAdmin ? (
+            ) : isCenterAdmin || isStaffAdmin ? (
               <>
                 <NavLink to="/admin" end className={navLinkClass}>
                   Dashboard
@@ -69,6 +69,11 @@ export default function Navbar() {
                 <NavLink to="/admin/tests" className={navLinkClass}>
                   Tests
                 </NavLink>
+                {isCenterAdmin && (
+                  <NavLink to="/admin/staff" className={navLinkClass}>
+                    Staff
+                  </NavLink>
+                )}
               </>
             ) : (
               <>
@@ -139,7 +144,7 @@ export default function Navbar() {
                           <UserCog className="w-4 h-4" /> Center Admins
                         </Link>
                       </>
-                    ) : isCenterAdmin ? (
+                    ) : isCenterAdmin || isStaffAdmin ? (
                       <>
                         <Link
                           to="/admin"
@@ -162,6 +167,15 @@ export default function Navbar() {
                         >
                           <FlaskConical className="w-4 h-4" /> Tests
                         </Link>
+                        {isCenterAdmin && (
+                          <Link
+                            to="/admin/staff"
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                            onClick={() => setDropOpen(false)}
+                          >
+                            <UserCog className="w-4 h-4" /> Staff
+                          </Link>
+                        )}
                       </>
                     ) : (
                       <>
@@ -258,7 +272,7 @@ export default function Navbar() {
                 Center Admins
               </NavLink>
             </>
-          ) : isCenterAdmin ? (
+          ) : isCenterAdmin || isStaffAdmin ? (
             <>
               <NavLink
                 to="/admin"
@@ -282,6 +296,15 @@ export default function Navbar() {
               >
                 Tests
               </NavLink>
+              {isCenterAdmin && (
+                <NavLink
+                  to="/admin/staff"
+                  className={navLinkClass}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Staff
+                </NavLink>
+              )}
             </>
           ) : (
             <>

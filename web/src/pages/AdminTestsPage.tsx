@@ -34,7 +34,7 @@ const emptyForm: TestForm = {
 };
 
 export default function AdminTestsPage() {
-  const { isCenterAdmin, adminCenterId } = useAuth();
+  const { isCenterAdmin, isStaffAdmin, adminCenterId } = useAuth();
 
   // ── Center admin state ─────────────────────────────────────────────────────
   const [centerTests, setCenterTests] = useState<CenterTestOfferingResponse[]>(
@@ -117,8 +117,8 @@ export default function AdminTestsPage() {
   };
 
   useEffect(() => {
-    if (isCenterAdmin) fetchCenterTests();
-  }, [isCenterAdmin, adminCenterId]);
+    if (isCenterAdmin || isStaffAdmin) fetchCenterTests();
+  }, [isCenterAdmin, isStaffAdmin, adminCenterId]);
 
   const openCreate = () => {
     setEditingTest(null);
@@ -190,7 +190,7 @@ export default function AdminTestsPage() {
   );
 
   // ── Center admin view (early return) ──────────────────────────────────────
-  if (isCenterAdmin) {
+  if (isCenterAdmin || isStaffAdmin) {
     const assignedIds = new Set(centerTests.map((t) => t.testId));
     const available = allCatalogTests.filter(
       (t) =>
@@ -328,81 +328,83 @@ export default function AdminTestsPage() {
                           </p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleRemove(t.testId)}
-                        disabled={togglingId === t.testId}
-                        className="shrink-0 flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-50"
-                      >
-                        {togglingId === t.testId ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Minus className="w-3.5 h-3.5" />
-                        )}
-                        Remove
-                      </button>
+                      {isCenterAdmin && (
+                        <button
+                          onClick={() => handleRemove(t.testId)}
+                          disabled={togglingId === t.testId}
+                          className="shrink-0 flex items-center gap-1 text-xs font-medium text-red-500 border border-red-100 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        >
+                          {togglingId === t.testId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Minus className="w-3.5 h-3.5" />
+                          )}
+                          Remove
+                        </button>
+                      )}
                     </div>
 
-                    {/* Price editing row */}
-                    {editingPriceTestId === t.testId ? (
-                      <div className="border-t pt-3 space-y-2">
-                        {priceLoadingId === t.testId ? (
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            Loading suggestion…
-                          </div>
-                        ) : priceSuggestion ? (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPriceInput(
-                                String(priceSuggestion.suggestedPrice),
-                              )
-                            }
-                            className="text-xs text-indigo-600 hover:underline"
-                          >
-                            Use suggested ₱
-                            {priceSuggestion.suggestedPrice.toFixed(2)}
-                          </button>
-                        ) : null}
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-sm">₱</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="10"
-                            className="input-field py-1.5 text-sm flex-1"
-                            value={priceInput}
-                            onChange={(e) => setPriceInput(e.target.value)}
-                          />
-                          <button
-                            onClick={() => handlePriceSave(t.testId)}
-                            disabled={priceSaving}
-                            className="shrink-0 flex items-center gap-1 text-xs font-medium text-white bg-indigo-600 rounded-lg px-3 py-1.5 hover:bg-indigo-700 disabled:opacity-50"
-                          >
-                            {priceSaving ? (
+                    {isCenterAdmin &&
+                      (editingPriceTestId === t.testId ? (
+                        <div className="border-t pt-3 space-y-2">
+                          {priceLoadingId === t.testId ? (
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Check className="w-3.5 h-3.5" />
-                            )}
-                            Save
-                          </button>
-                          <button
-                            onClick={() => setEditingPriceTestId(null)}
-                            className="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
+                              Loading suggestion…
+                            </div>
+                          ) : priceSuggestion ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPriceInput(
+                                  String(priceSuggestion.suggestedPrice),
+                                )
+                              }
+                              className="text-xs text-indigo-600 hover:underline"
+                            >
+                              Use suggested ₱
+                              {priceSuggestion.suggestedPrice.toFixed(2)}
+                            </button>
+                          ) : null}
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400 text-sm">₱</span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="10"
+                              className="input-field py-1.5 text-sm flex-1"
+                              value={priceInput}
+                              onChange={(e) => setPriceInput(e.target.value)}
+                            />
+                            <button
+                              onClick={() => handlePriceSave(t.testId)}
+                              disabled={priceSaving}
+                              className="shrink-0 flex items-center gap-1 text-xs font-medium text-white bg-indigo-600 rounded-lg px-3 py-1.5 hover:bg-indigo-700 disabled:opacity-50"
+                            >
+                              {priceSaving ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5" />
+                              )}
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingPriceTestId(null)}
+                              className="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => openPriceEdit(t.testId, t.testPrice)}
-                        className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors border-t pt-3 w-fit"
-                      >
-                        <DollarSign className="w-3.5 h-3.5" />
-                        Edit price
-                      </button>
-                    )}
+                      ) : (
+                        <button
+                          onClick={() => openPriceEdit(t.testId, t.testPrice)}
+                          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors border-t pt-3 w-fit"
+                        >
+                          <DollarSign className="w-3.5 h-3.5" />
+                          Edit price
+                        </button>
+                      ))}
                   </div>
                 ))}
               </div>
