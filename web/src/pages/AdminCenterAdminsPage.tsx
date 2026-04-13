@@ -57,13 +57,13 @@ export default function AdminCenterAdminsPage() {
     fetchData();
   }, []);
 
-  const centerName = (centerId?: number | null) =>
-    centers.find((c) => c.id === centerId)?.name ?? `Center #${centerId}`;
-
   // Group admins by center
-  const adminsByCenterId = new Map<number, UserProfileResponse>();
+  const adminsByCenterId = new Map<number, UserProfileResponse[]>();
   centerAdmins.forEach((a) => {
-    if (a.centerId) adminsByCenterId.set(a.centerId, a);
+    if (a.centerId) {
+      const existing = adminsByCenterId.get(a.centerId) ?? [];
+      adminsByCenterId.set(a.centerId, [...existing, a]);
+    }
   });
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -108,8 +108,10 @@ export default function AdminCenterAdminsPage() {
     }
   };
 
-  // Centers without an admin assigned
+  // Centers without any admin assigned
   const unassignedCenters = centers.filter((c) => !adminsByCenterId.has(c.id));
+  // Centers with at least one admin, sorted by center name
+  const assignedCenters = centers.filter((c) => adminsByCenterId.has(c.id));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -278,7 +280,6 @@ export default function AdminCenterAdminsPage() {
                   {centers.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
-                      {adminsByCenterId.has(c.id) ? " (already assigned)" : ""}
                     </option>
                   ))}
                 </select>
@@ -318,49 +319,78 @@ export default function AdminCenterAdminsPage() {
       ) : (
         <>
           {/* Assigned centers */}
-          {centerAdmins.length > 0 && (
+          {assignedCenters.length > 0 && (
             <div className="mb-10">
               <h2 className="text-lg font-bold text-gray-800 mb-4">
                 Assigned Centers
                 <span className="ml-2 text-sm font-normal text-gray-400">
-                  ({centerAdmins.length})
+                  ({assignedCenters.length})
                 </span>
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {centerAdmins.map((admin) => (
-                  <div key={admin.userId} className="card">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                          <span className="text-blue-600 font-bold text-sm">
-                            {admin.fullName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-gray-900 text-sm truncate">
-                            {admin.fullName}
-                          </p>
-                          <p className="text-gray-400 text-xs truncate">
-                            {admin.email}
+                {assignedCenters.map((center) => {
+                  const admins = adminsByCenterId.get(center.id) ?? [];
+                  return (
+                    <div key={center.id} className="card flex flex-col gap-3">
+                      {/* Center header */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                            <Building2 className="w-4 h-4 text-blue-500" />
+                          </div>
+                          <p className="font-bold text-gray-900 text-sm truncate">
+                            {center.name}
                           </p>
                         </div>
+                        <button
+                          onClick={() => {
+                            setForm({ ...emptyForm, centerId: center.id });
+                            setError("");
+                            setShowPassword(false);
+                            setModalOpen(true);
+                          }}
+                          className="shrink-0 flex items-center gap-1 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg px-2.5 py-1.5 hover:bg-blue-50 transition-colors"
+                          title="Add another admin to this center"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setConfirmRemoveId(admin.userId)}
-                        className="shrink-0 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Remove center admin"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+
+                      {/* Admin list */}
+                      <div className="divide-y divide-gray-100 border-t border-gray-100">
+                        {admins.map((admin) => (
+                          <div
+                            key={admin.userId}
+                            className="flex items-center justify-between gap-3 pt-3 first:pt-3"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-blue-600 font-bold text-xs">
+                                  {admin.fullName.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-semibold text-gray-900 text-sm truncate">
+                                  {admin.fullName}
+                                </p>
+                                <p className="text-gray-400 text-xs truncate">
+                                  {admin.email}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setConfirmRemoveId(admin.userId)}
+                              className="shrink-0 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Remove this admin"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-2 pt-3 border-t border-gray-100">
-                      <Building2 className="w-4 h-4 text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600 truncate">
-                        {centerName(admin.centerId)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
