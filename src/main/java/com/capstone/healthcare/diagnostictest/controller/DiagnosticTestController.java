@@ -6,6 +6,8 @@ import com.capstone.healthcare.diagnostictest.model.TestCategory;
 import com.capstone.healthcare.diagnostictest.service.IDiagnosticTestService;
 import com.capstone.healthcare.diagnostictest.service.ITestCatalogService;
 import com.capstone.healthcare.diagnostictest.service.ITestService;
+import com.capstone.healthcare.diagnosticcenter.dto.TestPriceEntry;
+import com.capstone.healthcare.diagnosticcenter.service.ICenterPricingService;
 import com.capstone.healthcare.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +29,15 @@ public class DiagnosticTestController {
     private final IDiagnosticTestService diagnosticTestService;
     private final ITestService testService;
     private final ITestCatalogService testCatalogService;
+    private final ICenterPricingService pricingService;
+
+    // ── GET /api/tests/{testId}/prices ─────────────────────────────────────
+    @GetMapping("/{testId}/prices")
+    @Operation(summary = "Get all center prices for a specific test, sorted ascending")
+    public ResponseEntity<ApiResponse<List<TestPriceEntry>>> getPricesForTest(
+            @PathVariable int testId) {
+        return ResponseEntity.ok(ApiResponse.ok(pricingService.getPricesForTest(testId)));
+    }
 
     // ── GET /api/tests ────────────────────────────────────────────────────────
     @GetMapping

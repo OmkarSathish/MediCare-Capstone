@@ -5,6 +5,7 @@ import com.capstone.healthcare.diagnosticcenter.dto.*;
 import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
 import com.capstone.healthcare.diagnosticcenter.service.ICenterLookupService;
+import com.capstone.healthcare.diagnosticcenter.service.ICenterPricingService;
 import com.capstone.healthcare.diagnosticcenter.service.IDiagnosticCenterService;
 import com.capstone.healthcare.shared.response.ApiResponse;
 import com.capstone.healthcare.shared.security.RoleConstants;
@@ -32,6 +33,7 @@ public class DiagnosticCenterController {
 
         private final IDiagnosticCenterService centerService;
         private final ICenterLookupService centerLookupService;
+        private final ICenterPricingService pricingService;
 
         // ── GET /api/centers ──────────────────────────────────────────────────────
         @GetMapping
@@ -141,6 +143,30 @@ public class DiagnosticCenterController {
                 CenterTestOffering offering = centerService.addTest(id, testId, price);
                 return ResponseEntity.status(HttpStatus.CREATED)
                                 .body(ApiResponse.ok("Test added to center", toOfferingResponse(offering)));
+        }
+
+        // ── GET /api/centers/{id}/tests/{testId}/suggested-price ──────────────────
+        @GetMapping("/{id}/tests/{testId}/suggested-price")
+        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
+        @Operation(summary = "Get a suggested price for a test at a center")
+        public ResponseEntity<ApiResponse<SuggestedPriceResponse>> getSuggestedPrice(
+                        @PathVariable int id,
+                        @PathVariable int testId) {
+                return ResponseEntity.ok(ApiResponse.ok(pricingService.getSuggestedPrice(id, testId)));
+        }
+
+        // ── PUT /api/centers/{id}/tests/{testId}/price ───────────────────────────
+        @PutMapping("/{id}/tests/{testId}/price")
+        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
+        @Operation(summary = "Update the price of a test at a center")
+        public ResponseEntity<ApiResponse<Void>> updateTestPrice(
+                        @PathVariable int id,
+                        @PathVariable int testId,
+                        @RequestParam double price,
+                        @AuthenticationPrincipal UserPrincipal principal) {
+                enforceCenterOwnership(id, principal);
+                pricingService.updatePrice(id, testId, price);
+                return ResponseEntity.ok(ApiResponse.ok("Price updated", null));
         }
 
         // ── DELETE /api/centers/{id}/tests/{testId}
