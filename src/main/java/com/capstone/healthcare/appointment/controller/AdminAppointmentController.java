@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/appointments")
-@PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
+@PreAuthorize("hasAnyRole('" + RoleConstants.CENTER_ADMIN + "', '" + RoleConstants.CENTER_STAFF + "')")
 @RequiredArgsConstructor
 @Tag(name = "Admin — Appointments", description = "Admin approval, rejection, and filtered appointment listing")
 public class AdminAppointmentController {
@@ -38,10 +38,11 @@ public class AdminAppointmentController {
                         @RequestParam(defaultValue = "-1") int status,
                         @AuthenticationPrincipal UserPrincipal principal) {
 
-                // CENTER_ADMIN is always scoped to their assigned center
-                boolean isCenterAdmin = principal.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
-                int effectiveCenterId = isCenterAdmin
+                // CENTER_ADMIN and CENTER_STAFF are both scoped to their assigned center
+                boolean isScopedAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN)
+                                                || a.getAuthority().equals(RoleConstants.ROLE_CENTER_STAFF));
+                int effectiveCenterId = isScopedAdmin
                                 ? (principal.getCenterId() != null ? principal.getCenterId() : 0)
                                 : centerId;
 
@@ -80,9 +81,10 @@ public class AdminAppointmentController {
 
         // ── helpers ───────────────────────────────────────────────────────────────
         private void enforceAppointmentOwnership(int appointmentId, UserPrincipal principal) {
-                boolean isCenterAdmin = principal.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
-                if (!isCenterAdmin)
+                boolean isScopedAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN)
+                                                || a.getAuthority().equals(RoleConstants.ROLE_CENTER_STAFF));
+                if (!isScopedAdmin)
                         return;
                 Appointment appointment = appointmentService.viewAppointment(appointmentId);
                 if (principal.getCenterId() == null ||

@@ -35,7 +35,7 @@ public class AdminController {
 
     // ── GET /api/admin/dashboard/center ──────────────────────────────────────
     @GetMapping("/dashboard/center")
-    @PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
+    @PreAuthorize("hasAnyRole('" + RoleConstants.CENTER_ADMIN + "', '" + RoleConstants.CENTER_STAFF + "')")
     @Operation(summary = "Get center-scoped dashboard analytics for the calling center admin")
     public ResponseEntity<ApiResponse<CenterAdminDashboardResponse>> getCenterDashboard(
             @AuthenticationPrincipal UserPrincipal principal) {

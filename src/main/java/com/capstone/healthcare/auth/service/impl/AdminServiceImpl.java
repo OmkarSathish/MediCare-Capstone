@@ -9,6 +9,7 @@ import com.capstone.healthcare.auth.service.IPasswordEncoderService;
 import com.capstone.healthcare.shared.exception.ValidationException;
 import com.capstone.healthcare.shared.security.RoleConstants;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,6 +72,45 @@ public class AdminServiceImpl implements IAdminService {
         UserAccount user = adminRepository.findById(userId)
                 .orElseThrow(() -> new ValidationException("User not found: " + userId));
         user.getRoles().removeIf(r -> r.getRoleName().equals(RoleConstants.CENTER_ADMIN));
+        user.setCenterId(null);
+        adminRepository.save(user);
+    }
+
+    // ── Center staff ─────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public void registerCenterStaff(String email, String password, String fullName, int centerId) {
+        if (adminRepository.existsByEmail(email)) {
+            throw new ValidationException("User already exists with email: " + email);
+        }
+        Role staffRole = roleRepository.findByRoleName(RoleConstants.CENTER_STAFF)
+                .orElseGet(() -> roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_STAFF).build()));
+        UserAccount staff = UserAccount.builder()
+                .email(email)
+                .fullName(fullName)
+                .passwordHash(passwordEncoderService.encode(password))
+                .status("ACTIVE")
+                .centerId(centerId)
+                .roles(Set.of(staffRole))
+                .build();
+        adminRepository.save(staff);
+    }
+
+    @Override
+    public List<UserAccount> listStaffForCenter(int centerId) {
+        return adminRepository.findAllByCenterIdAndRoles_RoleName(centerId, RoleConstants.CENTER_STAFF);
+    }
+
+    @Override
+    @Transactional
+    public void removeCenterStaff(int userId, int requestingCenterId) {
+        UserAccount user = adminRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException("User not found: " + userId));
+        if (user.getCenterId() == null || user.getCenterId() != requestingCenterId) {
+            throw new AccessDeniedException("You can only remove staff from your own center");
+        }
+        user.getRoles().removeIf(r -> r.getRoleName().equals(RoleConstants.CENTER_STAFF));
         user.setCenterId(null);
         adminRepository.save(user);
     }

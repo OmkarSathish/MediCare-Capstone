@@ -19,4 +19,6 @@ public interface IAdminRepository extends JpaRepository<UserAccount, Integer> {
     boolean existsByEmail(String email);
 
     List<UserAccount> findAllByCenterIdIsNotNull();
+
+    List<UserAccount> findAllByCenterIdAndRoles_RoleName(int centerId, String roleName);
 }

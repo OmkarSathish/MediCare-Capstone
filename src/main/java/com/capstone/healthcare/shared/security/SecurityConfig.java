@@ -42,11 +42,13 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/tests/**").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/centers/**").permitAll()
                                                 // Admin-only endpoints
-                                                // Appointments are CENTER_ADMIN only; all other /admin/** is primary
-                                                // ADMIN only
+                                                // Appointments and center dashboard: CENTER_ADMIN or CENTER_STAFF
                                                 .requestMatchers("/api/admin/appointments/**")
-                                                .hasRole(RoleConstants.CENTER_ADMIN)
+                                                .hasAnyRole(RoleConstants.CENTER_ADMIN, RoleConstants.CENTER_STAFF)
                                                 .requestMatchers(HttpMethod.GET, "/api/admin/dashboard/center")
+                                                .hasAnyRole(RoleConstants.CENTER_ADMIN, RoleConstants.CENTER_STAFF)
+                                                // Staff management: CENTER_ADMIN only
+                                                .requestMatchers("/api/auth/center-admin/staff/**")
                                                 .hasRole(RoleConstants.CENTER_ADMIN)
                                                 .requestMatchers("/api/admin/**").hasRole(RoleConstants.ADMIN)
                                                 .requestMatchers(HttpMethod.POST, "/api/tests/**")

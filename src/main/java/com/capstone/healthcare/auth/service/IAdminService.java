@@ -13,4 +13,10 @@ public interface IAdminService {
     List<UserAccount> listCenterAdmins();
 
     void removeCenterAdmin(int userId);
+
+    void registerCenterStaff(String email, String password, String fullName, int centerId);
+
+    List<UserAccount> listStaffForCenter(int centerId);
+
+    void removeCenterStaff(int userId, int requestingCenterId);
 }

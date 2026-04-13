@@ -131,7 +131,8 @@ public class DiagnosticCenterController {
 
         // ── POST /api/centers/{id}/tests/{testId} ─────────────────────────────────
         @PostMapping("/{id}/tests/{testId}")
-        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "')")
+        @PreAuthorize("hasAnyRole('" + RoleConstants.ADMIN + "', '" + RoleConstants.CENTER_ADMIN + "', '"
+                        + RoleConstants.CENTER_STAFF + "')")
         @Operation(summary = "Add a test to a center's offerings (admin only)")
         public ResponseEntity<ApiResponse<CenterTestOfferingResponse>> addTestToCenter(
                         @PathVariable int id,
@@ -195,9 +196,10 @@ public class DiagnosticCenterController {
 
         // ── helpers ───────────────────────────────────────────────────────────────
         private void enforceCenterOwnership(int centerId, UserPrincipal principal) {
-                boolean isCenterAdmin = principal.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
-                if (!isCenterAdmin)
+                boolean isScopedAdmin = principal.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN)
+                                                || a.getAuthority().equals(RoleConstants.ROLE_CENTER_STAFF));
+                if (!isScopedAdmin)
                         return;
                 if (principal.getCenterId() == null || principal.getCenterId() != centerId) {
                         throw new AccessDeniedException(

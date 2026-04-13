@@ -156,6 +156,47 @@ public class AuthController {
                 return ResponseEntity.ok(ApiResponse.ok("Center admin removed", null));
         }
 
+        // ── POST /api/center-admin/staff ──────────────────────────────────────────
+        @PostMapping("/center-admin/staff")
+        @PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
+        @Operation(summary = "Create a staff admin account for the calling center admin's center")
+        public ResponseEntity<ApiResponse<Void>> registerCenterStaff(
+                        @Valid @RequestBody CreateCenterAdminRequest request,
+                        @AuthenticationPrincipal UserPrincipal principal) {
+
+                int centerId = principal.getCenterId() != null ? principal.getCenterId() : 0;
+                adminService.registerCenterStaff(
+                                request.getEmail(), request.getPassword(), request.getFullName(), centerId);
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                .body(ApiResponse.ok("Staff admin account created", null));
+        }
+
+        // ── GET /api/center-admin/staff ───────────────────────────────────────────
+        @GetMapping("/center-admin/staff")
+        @PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
+        @Operation(summary = "List all staff admins for the calling center admin's center")
+        public ResponseEntity<ApiResponse<List<UserProfileResponse>>> listCenterStaff(
+                        @AuthenticationPrincipal UserPrincipal principal) {
+
+                int centerId = principal.getCenterId() != null ? principal.getCenterId() : 0;
+                List<UserProfileResponse> list = adminService.listStaffForCenter(centerId)
+                                .stream().map(this::toProfile).toList();
+                return ResponseEntity.ok(ApiResponse.ok(list));
+        }
+
+        // ── DELETE /api/center-admin/staff/{id} ───────────────────────────────────
+        @DeleteMapping("/center-admin/staff/{id}")
+        @PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
+        @Operation(summary = "Remove a staff admin from the calling center admin's center")
+        public ResponseEntity<ApiResponse<Void>> removeCenterStaff(
+                        @PathVariable int id,
+                        @AuthenticationPrincipal UserPrincipal principal) {
+
+                int centerId = principal.getCenterId() != null ? principal.getCenterId() : 0;
+                adminService.removeCenterStaff(id, centerId);
+                return ResponseEntity.ok(ApiResponse.ok("Staff admin removed", null));
+        }
+
         // ── helpers ──────────────────────────────────────────────────────────────
         private UserProfileResponse toProfile(UserAccount user) {
                 return UserProfileResponse.builder()
