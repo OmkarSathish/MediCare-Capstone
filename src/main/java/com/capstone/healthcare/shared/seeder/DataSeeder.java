@@ -8,7 +8,10 @@ import com.capstone.healthcare.auth.model.UserAccount;
 import com.capstone.healthcare.auth.repository.IRoleRepository;
 import com.capstone.healthcare.auth.repository.IUserRepository;
 import com.capstone.healthcare.auth.service.IPasswordEncoderService;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOfferingKey;
 import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
+import com.capstone.healthcare.diagnosticcenter.repository.ICenterTestOfferingRepository;
 import com.capstone.healthcare.diagnosticcenter.repository.IDiagnosticCenterRepository;
 import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
 import com.capstone.healthcare.diagnostictest.model.TestCategory;
@@ -26,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -54,6 +59,7 @@ public class DataSeeder implements CommandLineRunner {
         private final ITestCategoryRepository categoryRepository;
         private final IDiagnosticTestRepository testRepository;
         private final IDiagnosticCenterRepository centerRepository;
+        private final ICenterTestOfferingRepository offeringRepository;
         private final IAppointmentRepository appointmentRepository;
         private final IPasswordEncoderService passwordEncoderService;
 
@@ -304,6 +310,7 @@ public class DataSeeder implements CommandLineRunner {
                                                                 biopsy, lipid, troponin)));
 
                 List<DiagnosticCenter> centers = new ArrayList<>();
+                Map<DiagnosticCenter, List<DiagnosticTest>> centerTestsMap = new HashMap<>();
                 for (int i = 0; i < specs.size(); i++) {
                         CenterSpec s = specs.get(i);
 
@@ -314,9 +321,21 @@ public class DataSeeder implements CommandLineRunner {
                                         .contactEmail(s.email())
                                         .status("ACTIVE")
                                         .servicesOffered(s.services())
-                                        .tests(Set.copyOf(s.tests()))
                                         .build());
                         centers.add(center);
+                        centerTestsMap.put(center, s.tests());
+
+                        // Per-center test offerings with ±20% price variation
+                        for (DiagnosticTest test : s.tests()) {
+                                double variation = 0.8 + rng.nextDouble() * 0.4; // 0.8–1.2
+                                double price = Math.round(test.getTestPrice() * variation / 10.0) * 10.0;
+                                offeringRepository.save(CenterTestOffering.builder()
+                                                .id(new CenterTestOfferingKey(center.getId(), test.getId()))
+                                                .center(center)
+                                                .test(test)
+                                                .price(price)
+                                                .build());
+                        }
 
                         // Center admin account
                         String adminEmail = "admin." + s.slug() + "@healthcare.ph";
@@ -426,7 +445,7 @@ public class DataSeeder implements CommandLineRunner {
                         ApprovalStatus status = statuses[i % statuses.length];
 
                         // Pick 1-3 tests from the center's test list
-                        List<DiagnosticTest> centerTests = new ArrayList<>(c.getTests());
+                        List<DiagnosticTest> centerTests = centerTestsMap.get(c);
                         int numTests = 1 + (i % Math.min(3, centerTests.size()));
                         Set<DiagnosticTest> chosenTests = Set.copyOf(centerTests.subList(0, numTests));
 

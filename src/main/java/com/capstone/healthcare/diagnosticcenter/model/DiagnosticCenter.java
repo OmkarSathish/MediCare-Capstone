@@ -1,6 +1,5 @@
 package com.capstone.healthcare.diagnosticcenter.model;
 
-import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -10,7 +9,11 @@ import java.util.Set;
 
 @Entity
 @Table(schema = "diagnosticcenter_schema", name = "diagnostic_centers")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DiagnosticCenter {
 
     @Id
@@ -33,22 +36,12 @@ public class DiagnosticCenter {
     private String status;
 
     @ElementCollection
-    @CollectionTable(
-        schema = "diagnosticcenter_schema",
-        name = "center_services",
-        joinColumns = @JoinColumn(name = "center_id")
-    )
+    @CollectionTable(schema = "diagnosticcenter_schema", name = "center_services", joinColumns = @JoinColumn(name = "center_id"))
     @Column(name = "service")
     @Builder.Default
     private List<String> servicesOffered = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-        schema = "diagnosticcenter_schema",
-        name = "center_test_offerings",
-        joinColumns = @JoinColumn(name = "center_id"),
-        inverseJoinColumns = @JoinColumn(name = "test_id")
-    )
+    @OneToMany(mappedBy = "center", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<DiagnosticTest> tests = new HashSet<>();
+    private Set<CenterTestOffering> testOfferings = new HashSet<>();
 }

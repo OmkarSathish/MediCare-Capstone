@@ -19,64 +19,64 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CenterAdminDashboardServiceImpl implements ICenterAdminDashboardService {
 
-    private final IAppointmentRepository appointmentRepository;
-    private final IDiagnosticCenterRepository centerRepository;
+        private final IAppointmentRepository appointmentRepository;
+        private final IDiagnosticCenterRepository centerRepository;
 
-    @Override
-    @Transactional(readOnly = true)
-    public CenterAdminDashboardResponse getDashboardForCenter(int centerId) {
+        @Override
+        @Transactional(readOnly = true)
+        public CenterAdminDashboardResponse getDashboardForCenter(int centerId) {
 
-        DiagnosticCenter center = centerRepository.findById(centerId)
-                .orElseThrow(() -> new ResourceNotFoundException("DiagnosticCenter", "id", centerId));
+                DiagnosticCenter center = centerRepository.findById(centerId)
+                                .orElseThrow(() -> new ResourceNotFoundException("DiagnosticCenter", "id", centerId));
 
-        // ── Headline stats ────────────────────────────────────────────────────
-        long total = appointmentRepository.countByDiagnosticCenter_Id(centerId);
-        long pending = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
-                ApprovalStatus.PENDING);
-        long approved = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
-                ApprovalStatus.APPROVED);
-        long rejected = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
-                ApprovalStatus.REJECTED);
-        long cancelled = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
-                ApprovalStatus.CANCELLED);
-        long assignedTests = center.getTests().size();
+                // ── Headline stats ────────────────────────────────────────────────────
+                long total = appointmentRepository.countByDiagnosticCenter_Id(centerId);
+                long pending = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
+                                ApprovalStatus.PENDING);
+                long approved = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
+                                ApprovalStatus.APPROVED);
+                long rejected = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
+                                ApprovalStatus.REJECTED);
+                long cancelled = appointmentRepository.countByDiagnosticCenter_IdAndApprovalStatus(centerId,
+                                ApprovalStatus.CANCELLED);
+                long assignedTests = center.getTestOfferings().size();
 
-        // ── Appointments by month (last 12) ───────────────────────────────────
-        Map<String, Long> rawMonths = appointmentRepository.countByMonthForCenter(centerId).stream()
-                .collect(Collectors.toMap(
-                        r -> String.format("%04d-%02d", (Number) r[0], (Number) r[1]),
-                        r -> (Long) r[2],
-                        (a, b) -> a,
-                        LinkedHashMap::new));
+                // ── Appointments by month (last 12) ───────────────────────────────────
+                Map<String, Long> rawMonths = appointmentRepository.countByMonthForCenter(centerId).stream()
+                                .collect(Collectors.toMap(
+                                                r -> String.format("%04d-%02d", (Number) r[0], (Number) r[1]),
+                                                r -> (Long) r[2],
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
 
-        Map<String, Long> last12Months = rawMonths.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .skip(Math.max(0, rawMonths.size() - 12))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> a,
-                        LinkedHashMap::new));
+                Map<String, Long> last12Months = rawMonths.entrySet().stream()
+                                .sorted(Map.Entry.comparingByKey())
+                                .skip(Math.max(0, rawMonths.size() - 12))
+                                .collect(Collectors.toMap(
+                                                Map.Entry::getKey,
+                                                Map.Entry::getValue,
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
 
-        // ── Top 5 tests for this center ───────────────────────────────────────
-        Map<String, Long> topTests = appointmentRepository.countByTestForCenter(centerId).stream()
-                .limit(5)
-                .collect(Collectors.toMap(
-                        r -> (String) r[0],
-                        r -> (Long) r[1],
-                        (a, b) -> a,
-                        LinkedHashMap::new));
+                // ── Top 5 tests for this center ───────────────────────────────────────
+                Map<String, Long> topTests = appointmentRepository.countByTestForCenter(centerId).stream()
+                                .limit(5)
+                                .collect(Collectors.toMap(
+                                                r -> (String) r[0],
+                                                r -> (Long) r[1],
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
 
-        return CenterAdminDashboardResponse.builder()
-                .centerName(center.getName())
-                .totalAppointments(total)
-                .pendingAppointments(pending)
-                .approvedAppointments(approved)
-                .rejectedAppointments(rejected)
-                .cancelledAppointments(cancelled)
-                .assignedTests(assignedTests)
-                .appointmentsByMonth(last12Months)
-                .topTests(topTests)
-                .build();
-    }
+                return CenterAdminDashboardResponse.builder()
+                                .centerName(center.getName())
+                                .totalAppointments(total)
+                                .pendingAppointments(pending)
+                                .approvedAppointments(approved)
+                                .rejectedAppointments(rejected)
+                                .cancelledAppointments(cancelled)
+                                .assignedTests(assignedTests)
+                                .appointmentsByMonth(last12Months)
+                                .topTests(topTests)
+                                .build();
+        }
 }

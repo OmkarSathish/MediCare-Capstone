@@ -1,10 +1,10 @@
 package com.capstone.healthcare.diagnosticcenter.service;
 
-import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 
 public interface ICenterCatalogService {
 
-    DiagnosticTest viewTestDetails(int diagnosticCenterId, String testName);
+    CenterTestOffering viewTestOffering(int diagnosticCenterId, String testName);
 
-    DiagnosticTest addTest(int diagnosticCenterId, int testId);
+    CenterTestOffering addTest(int diagnosticCenterId, int testId, double price);
 }

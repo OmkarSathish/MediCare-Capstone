@@ -17,8 +17,8 @@ public interface IDiagnosticTestRepository extends JpaRepository<DiagnosticTest,
      */
     @Query("""
             SELECT t FROM DiagnosticTest t
-            JOIN t.diagnosticCenters dc
-            WHERE dc.id = :centerId
+            JOIN t.centerOfferings o
+            WHERE o.center.id = :centerId
             """)
     List<DiagnosticTest> findByCenterId(@Param("centerId") int centerId);
 

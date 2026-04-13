@@ -1,6 +1,6 @@
 package com.capstone.healthcare.diagnostictest.model;
 
-import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,11 +39,7 @@ public class DiagnosticTest {
     @JoinColumn(name = "category_id")
     private TestCategory category;
 
-    /**
-     * Inverse side of DiagnosticCenter.tests @ManyToMany.
-     * Owned by DiagnosticCenter via center_test_offerings join table.
-     */
-    @ManyToMany(mappedBy = "tests")
+    @OneToMany(mappedBy = "test")
     @Builder.Default
-    private Set<DiagnosticCenter> diagnosticCenters = new HashSet<>();
+    private Set<CenterTestOffering> centerOfferings = new HashSet<>();
 }

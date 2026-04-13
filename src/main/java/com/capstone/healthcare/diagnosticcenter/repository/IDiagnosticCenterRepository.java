@@ -12,32 +12,32 @@ import java.util.Optional;
 @Repository
 public interface IDiagnosticCenterRepository extends JpaRepository<DiagnosticCenter, Integer> {
 
-    /**
-     * getDiagnosticCenter — looks up a center by its exact name.
-     */
-    Optional<DiagnosticCenter> findByName(String name);
+        /**
+         * getDiagnosticCenter — looks up a center by its exact name.
+         */
+        Optional<DiagnosticCenter> findByName(String name);
 
-    /**
-     * searchCenters — case-insensitive partial name match used for lookup.
-     */
-    List<DiagnosticCenter> findByNameContainingIgnoreCase(String keyword);
+        /**
+         * searchCenters — case-insensitive partial name match used for lookup.
+         */
+        List<DiagnosticCenter> findByNameContainingIgnoreCase(String keyword);
 
-    /**
-     * getCentersOfferingTest — finds all centers that offer a given test.
-     */
-    @Query("SELECT dc FROM DiagnosticCenter dc JOIN dc.tests t WHERE t.id = :testId")
-    List<DiagnosticCenter> findByTestId(@Param("testId") int testId);
+        /**
+         * getCentersOfferingTest — finds all centers that offer a given test.
+         */
+        @Query("SELECT dc FROM DiagnosticCenter dc JOIN dc.testOfferings o WHERE o.test.id = :testId")
+        List<DiagnosticCenter> findByTestId(@Param("testId") int testId);
 
-    /**
-     * viewTestDetails — checks whether a specific test (by name) is offered
-     * at the given center.
-     */
-    @Query("""
-            SELECT dc FROM DiagnosticCenter dc
-            JOIN dc.tests t
-            WHERE dc.id = :centerId AND t.testName = :testName
-            """)
-    Optional<DiagnosticCenter> findCenterWithTest(
-            @Param("centerId") int centerId,
-            @Param("testName") String testName);
+        /**
+         * viewTestDetails — checks whether a specific test (by name) is offered
+         * at the given center.
+         */
+        @Query("""
+                        SELECT dc FROM DiagnosticCenter dc
+                        JOIN dc.testOfferings o
+                        WHERE dc.id = :centerId AND o.test.testName = :testName
+                        """)
+        Optional<DiagnosticCenter> findCenterWithTest(
+                        @Param("centerId") int centerId,
+                        @Param("testName") String testName);
 }

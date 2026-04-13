@@ -2,7 +2,10 @@ package com.capstone.healthcare.diagnosticcenter.service.impl;
 
 import com.capstone.healthcare.appointment.model.Appointment;
 import com.capstone.healthcare.appointment.repository.IAppointmentRepository;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOfferingKey;
 import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
+import com.capstone.healthcare.diagnosticcenter.repository.ICenterTestOfferingRepository;
 import com.capstone.healthcare.diagnosticcenter.repository.IDiagnosticCenterRepository;
 import com.capstone.healthcare.diagnosticcenter.service.IDiagnosticCenterService;
 import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
@@ -20,14 +23,17 @@ public class DiagnosticCenterServiceImpl implements IDiagnosticCenterService {
     private final IDiagnosticCenterRepository centerRepository;
     private final IDiagnosticTestRepository testRepository;
     private final IAppointmentRepository appointmentRepository;
+    private final ICenterTestOfferingRepository offeringRepository;
 
     public DiagnosticCenterServiceImpl(
             IDiagnosticCenterRepository centerRepository,
             IDiagnosticTestRepository testRepository,
-            @Lazy IAppointmentRepository appointmentRepository) {
+            @Lazy IAppointmentRepository appointmentRepository,
+            ICenterTestOfferingRepository offeringRepository) {
         this.centerRepository = centerRepository;
         this.testRepository = testRepository;
         this.appointmentRepository = appointmentRepository;
+        this.offeringRepository = offeringRepository;
     }
 
     @Override
@@ -82,34 +88,30 @@ public class DiagnosticCenterServiceImpl implements IDiagnosticCenterService {
     }
 
     @Override
-    public DiagnosticTest viewTestDetails(int diagnosticCenterId, String testName) {
-        DiagnosticCenter center = centerRepository.findCenterWithTest(diagnosticCenterId, testName)
+    public CenterTestOffering viewTestOffering(int diagnosticCenterId, String testName) {
+        return offeringRepository.findByCenter_IdAndTest_TestName(diagnosticCenterId, testName)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Test '" + testName + "' not offered at center id=" + diagnosticCenterId));
-        return center.getTests().stream()
-                .filter(t -> t.getTestName().equals(testName))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("DiagnosticTest", "testName", testName));
     }
 
     @Override
     @Transactional
-    public DiagnosticTest addTest(int diagnosticCenterId, int testId) {
+    public CenterTestOffering addTest(int diagnosticCenterId, int testId, double price) {
         DiagnosticCenter center = getDiagnosticCenterById(diagnosticCenterId);
         DiagnosticTest test = testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("DiagnosticTest", "id", testId));
-        center.getTests().add(test);
-        centerRepository.save(center);
-        return test;
+        CenterTestOffering offering = CenterTestOffering.builder()
+                .id(new CenterTestOfferingKey(diagnosticCenterId, testId))
+                .center(center)
+                .test(test)
+                .price(price)
+                .build();
+        return offeringRepository.save(offering);
     }
 
     @Override
     @Transactional
     public void removeTest(int diagnosticCenterId, int testId) {
-        DiagnosticCenter center = getDiagnosticCenterById(diagnosticCenterId);
-        DiagnosticTest test = testRepository.findById(testId)
-                .orElseThrow(() -> new ResourceNotFoundException("DiagnosticTest", "id", testId));
-        center.getTests().remove(test);
-        centerRepository.save(center);
+        offeringRepository.deleteById(new CenterTestOfferingKey(diagnosticCenterId, testId));
     }
 }

@@ -2,10 +2,10 @@ package com.capstone.healthcare.diagnosticcenter.controller;
 
 import com.capstone.healthcare.appointment.model.Appointment;
 import com.capstone.healthcare.diagnosticcenter.dto.*;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
 import com.capstone.healthcare.diagnosticcenter.service.ICenterLookupService;
 import com.capstone.healthcare.diagnosticcenter.service.IDiagnosticCenterService;
-import com.capstone.healthcare.diagnostictest.model.DiagnosticTest;
 import com.capstone.healthcare.shared.response.ApiResponse;
 import com.capstone.healthcare.shared.security.RoleConstants;
 import com.capstone.healthcare.shared.security.UserPrincipal;
@@ -60,8 +60,8 @@ public class DiagnosticCenterController {
                         @PathVariable int id) {
 
                 DiagnosticCenter center = centerService.getDiagnosticCenterById(id);
-                Set<CenterTestOfferingResponse> offerings = center.getTests().stream()
-                                .map(t -> toOfferingResponse(id, t))
+                Set<CenterTestOfferingResponse> offerings = center.getTestOfferings().stream()
+                                .map(this::toOfferingResponse)
                                 .collect(Collectors.toSet());
                 return ResponseEntity.ok(ApiResponse.ok(offerings));
         }
@@ -73,8 +73,8 @@ public class DiagnosticCenterController {
                         @PathVariable int id,
                         @PathVariable String testName) {
 
-                DiagnosticTest test = centerService.viewTestDetails(id, testName);
-                return ResponseEntity.ok(ApiResponse.ok(toOfferingResponse(id, test)));
+                CenterTestOffering offering = centerService.viewTestOffering(id, testName);
+                return ResponseEntity.ok(ApiResponse.ok(toOfferingResponse(offering)));
         }
 
         // ── GET /api/centers/{id}/appointments ────────────────────────────────────
@@ -134,12 +134,13 @@ public class DiagnosticCenterController {
         public ResponseEntity<ApiResponse<CenterTestOfferingResponse>> addTestToCenter(
                         @PathVariable int id,
                         @PathVariable int testId,
+                        @RequestParam(defaultValue = "0") double price,
                         @AuthenticationPrincipal UserPrincipal principal) {
 
                 enforceCenterOwnership(id, principal);
-                DiagnosticTest test = centerService.addTest(id, testId);
+                CenterTestOffering offering = centerService.addTest(id, testId, price);
                 return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.ok("Test added to center", toOfferingResponse(id, test)));
+                                .body(ApiResponse.ok("Test added to center", toOfferingResponse(offering)));
         }
 
         // ── DELETE /api/centers/{id}/tests/{testId}
@@ -180,11 +181,11 @@ public class DiagnosticCenterController {
 
         // ── mappers ───────────────────────────────────────────────────────────────
         private CenterResponse toResponse(DiagnosticCenter c) {
-                Set<CenterResponse.TestSummary> tests = c.getTests().stream()
-                                .map(t -> CenterResponse.TestSummary.builder()
-                                                .id(t.getId())
-                                                .testName(t.getTestName())
-                                                .testPrice(t.getTestPrice())
+                Set<CenterResponse.TestSummary> tests = c.getTestOfferings().stream()
+                                .map(o -> CenterResponse.TestSummary.builder()
+                                                .id(o.getTest().getId())
+                                                .testName(o.getTest().getTestName())
+                                                .testPrice(o.getPrice())
                                                 .build())
                                 .collect(Collectors.toSet());
                 return CenterResponse.builder()
@@ -207,14 +208,14 @@ public class DiagnosticCenterController {
                                 .build();
         }
 
-        private CenterTestOfferingResponse toOfferingResponse(int centerId, DiagnosticTest t) {
+        private CenterTestOfferingResponse toOfferingResponse(CenterTestOffering o) {
                 return CenterTestOfferingResponse.builder()
-                                .centerId(centerId)
-                                .testId(t.getId())
-                                .testName(t.getTestName())
-                                .testPrice(t.getTestPrice())
-                                .normalValue(t.getNormalValue())
-                                .units(t.getUnits())
+                                .centerId(o.getCenter().getId())
+                                .testId(o.getTest().getId())
+                                .testName(o.getTest().getTestName())
+                                .testPrice(o.getPrice())
+                                .normalValue(o.getTest().getNormalValue())
+                                .units(o.getTest().getUnits())
                                 .build();
         }
 

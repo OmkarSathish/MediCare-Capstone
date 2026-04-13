@@ -53,7 +53,7 @@ public class DiagnosticTestServiceImpl implements IDiagnosticTestService {
     public DiagnosticTest removeTestFromDiagnosticCenter(int centerId, DiagnosticTest test) {
         DiagnosticCenter center = centerRepository.findById(centerId)
                 .orElseThrow(() -> new ResourceNotFoundException("DiagnosticCenter", "id", centerId));
-        center.getTests().removeIf(t -> t.getId() == test.getId());
+        center.getTestOfferings().removeIf(o -> o.getTest().getId() == test.getId());
         centerRepository.save(center);
         return test;
     }
