@@ -158,7 +158,8 @@ public class AppointmentController {
                         return;
 
                 boolean isCenterAdmin = principal.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN));
+                                .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_CENTER_ADMIN)
+                                                || a.getAuthority().equals(RoleConstants.ROLE_CENTER_STAFF));
                 if (isCenterAdmin && principal.getCenterId() != null
                                 && appointment.getDiagnosticCenter().getId() == principal.getCenterId()) {
                         return;
