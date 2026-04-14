@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import {
   BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -366,9 +365,9 @@ export default function AdminDashboardPage() {
     ([month, count]) => ({ month, count }),
   );
 
-  const testChartData = Object.entries(stats?.topTests ?? {}).map(
-    ([name, count]) => ({ name, count }),
-  );
+  const testChartData = Object.entries(stats?.topTests ?? {})
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => Number(b.count) - Number(a.count));
 
   const headlineStats = [
     {
@@ -601,7 +600,7 @@ export default function AdminDashboardPage() {
           )}
         </div>
 
-        {/* Top 5 tests — vertical bar */}
+        {/* Most Booked Tests — ranked list */}
         <div className="card">
           <h2 className="font-bold text-gray-900 mb-5">Most Booked Tests</h2>
           {testChartData.length === 0 ? (
@@ -609,34 +608,47 @@ export default function AdminDashboardPage() {
               No data yet
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart
-                data={testChartData}
-                margin={{ top: 5, right: 10, left: -20, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: "#374151" }}
-                  angle={-30}
-                  textAnchor="end"
-                  interval={0}
-                />
-                <YAxis
-                  tick={{ fontSize: 11, fill: "#9ca3af" }}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "1px solid #e5e7eb",
-                    fontSize: 12,
-                  }}
-                  formatter={(v) => [v, "Bookings"]}
-                />
-                <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            (() => {
+              const max = Math.max(
+                ...testChartData.map((d) => Number(d.count)),
+              );
+              return (
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                  {testChartData.map((d, i) => (
+                    <div
+                      key={d.name}
+                      className="flex items-center gap-3 min-w-0"
+                    >
+                      {/* Rank badge */}
+                      <span
+                        className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                        ${i === 0 ? "bg-blue-600 text-white" : i === 1 ? "bg-blue-100 text-blue-700" : i === 2 ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}
+                      >
+                        {i + 1}
+                      </span>
+                      {/* Name */}
+                      <span
+                        className="w-36 shrink-0 text-xs text-gray-700 font-medium truncate"
+                        title={d.name}
+                      >
+                        {d.name}
+                      </span>
+                      {/* Progress bar */}
+                      <div className="flex-1 bg-gray-100 rounded-full h-2 min-w-0">
+                        <div
+                          className="h-2 rounded-full bg-blue-500 transition-all"
+                          style={{ width: `${(Number(d.count) / max) * 100}%` }}
+                        />
+                      </div>
+                      {/* Count */}
+                      <span className="shrink-0 text-xs font-semibold text-gray-700 w-6 text-right">
+                        {d.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()
           )}
         </div>
       </div>
