@@ -185,9 +185,13 @@ export default function AdminTestsPage() {
     }
   };
 
-  const filtered = tests.filter((t) =>
-    t.testName.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = tests.filter((t) => {
+    const q = search.toLowerCase();
+    return (
+      t.testName.toLowerCase().includes(q) ||
+      (t.categoryName ?? "").toLowerCase().includes(q)
+    );
+  });
 
   // ── Center admin view (early return) ──────────────────────────────────────
   if (isCenterAdmin || isStaffAdmin) {
@@ -196,10 +200,17 @@ export default function AdminTestsPage() {
       (t) =>
         !assignedIds.has(t.id) &&
         t.status === "ACTIVE" &&
-        t.testName.toLowerCase().includes(centerSearch.toLowerCase()),
+        (t.testName.toLowerCase().includes(centerSearch.toLowerCase()) ||
+          (t.categoryName ?? "")
+            .toLowerCase()
+            .includes(centerSearch.toLowerCase())),
     );
-    const filteredCenter = centerTests.filter((t) =>
-      t.testName.toLowerCase().includes(centerSearch.toLowerCase()),
+    const filteredCenter = centerTests.filter(
+      (t) =>
+        t.testName.toLowerCase().includes(centerSearch.toLowerCase()) ||
+        (t.categoryName ?? "")
+          .toLowerCase()
+          .includes(centerSearch.toLowerCase()),
     );
 
     const handleAdd = async (testId: number) => {

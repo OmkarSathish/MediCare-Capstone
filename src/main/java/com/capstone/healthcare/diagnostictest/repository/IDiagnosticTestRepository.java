@@ -27,6 +27,17 @@ public interface IDiagnosticTestRepository extends JpaRepository<DiagnosticTest,
      */
     List<DiagnosticTest> findByTestNameContainingIgnoreCase(String criteria);
 
+    /**
+     * searchByNameOrCategory — searches by test name OR category name.
+     */
+    @Query("""
+            SELECT t FROM DiagnosticTest t
+            LEFT JOIN t.category c
+            WHERE LOWER(t.testName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            """)
+    List<DiagnosticTest> findByNameOrCategoryName(@Param("keyword") String keyword);
+
     Optional<DiagnosticTest> findByTestName(String testName);
 
     /**

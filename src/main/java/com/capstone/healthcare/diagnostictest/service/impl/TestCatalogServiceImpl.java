@@ -16,7 +16,7 @@ public class TestCatalogServiceImpl implements ITestCatalogService {
 
     @Override
     public List<DiagnosticTest> searchTests(String keyword) {
-        return testRepository.findByTestNameContainingIgnoreCase(keyword);
+        return testRepository.findByNameOrCategoryName(keyword);
     }
 
     @Override
