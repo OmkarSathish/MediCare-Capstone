@@ -74,26 +74,16 @@ public class AppointmentController {
                 boolean isAdmin = principal.getAuthorities().stream()
                                 .anyMatch(a -> a.getAuthority().equals(RoleConstants.ROLE_ADMIN));
 
-                String lookupName = patient;
-                if (lookupName == null) {
-                        if (!isAdmin) {
-                                // customers default to their own appointments
-                                lookupName = patientService.viewPatient(principal.getUsername()).getName();
-                        } else {
-                                // admins with no filter get all — delegate to filtered list with wildcard via
-                                // service
-                                List<Appointment> all = appointmentService.getAppointmentList(0, "", 0);
-                                return ResponseEntity.ok(ApiResponse.ok(
-                                                all.stream().map(this::toResponse).toList()));
-                        }
+                if (isAdmin) {
+                        // admins get all appointments
+                        List<Appointment> all = appointmentService.getAppointmentList(0, "", 0);
+                        return ResponseEntity.ok(ApiResponse.ok(
+                                        all.stream().map(this::toResponse).toList()));
                 }
 
-                String finalName = lookupName;
-                if (!isAdmin && !patientService.viewPatient(principal.getUsername()).getName().equals(finalName)) {
-                        throw new AccessDeniedException("Access denied");
-                }
-
-                List<AppointmentResponse> responses = appointmentService.viewAppointments(finalName)
+                // customers get their own appointments by username (email)
+                List<AppointmentResponse> responses = appointmentService
+                                .viewAppointments(principal.getUsername())
                                 .stream().map(this::toResponse).toList();
                 return ResponseEntity.ok(ApiResponse.ok(responses));
         }

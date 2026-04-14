@@ -60,13 +60,13 @@ public class AppointmentServiceImpl implements IAppointmentService {
     }
 
     @Override
-    public List<Appointment> viewAppointments(String patientName) {
-        return appointmentRepository.findByPatient_NameOrderByAppointmentDateDesc(patientName);
+    public List<Appointment> viewAppointments(String username) {
+        return appointmentRepository.findByPatient_UsernameOrderByAppointmentDateDesc(username);
     }
 
     @Override
     public Appointment viewAppointment(int appointmentId) {
-        return appointmentRepository.findById(appointmentId)
+        return appointmentRepository.findByIdWithDetails(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
     }
 

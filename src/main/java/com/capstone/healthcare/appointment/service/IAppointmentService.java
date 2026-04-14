@@ -8,7 +8,7 @@ public interface IAppointmentService {
 
     Appointment addAppointment(Appointment appointment);
 
-    List<Appointment> viewAppointments(String patientName);
+    List<Appointment> viewAppointments(String username);
 
     Appointment viewAppointment(int appointmentId);
 

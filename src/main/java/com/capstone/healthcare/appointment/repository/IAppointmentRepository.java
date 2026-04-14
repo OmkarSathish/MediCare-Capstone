@@ -8,16 +8,20 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
 public interface IAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
+  @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.diagnosticCenter WHERE a.id = :id")
+  Optional<Appointment> findByIdWithDetails(@Param("id") int id);
+
   /**
-   * viewAppointments — all appointments belonging to a patient by their name,
-   * ordered newest-first.
+   * viewAppointments — all appointments belonging to a patient by their username
+   * (email), ordered newest-first.
    */
-  List<Appointment> findByPatient_NameOrderByAppointmentDateDesc(String patientName);
+  List<Appointment> findByPatient_UsernameOrderByAppointmentDateDesc(String username);
 
   /**
    * getAppointmentList — filtered list by center, test name, and status.
