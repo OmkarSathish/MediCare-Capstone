@@ -1,5 +1,5 @@
-import { useEffect, useState, Fragment, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useState, Fragment, useRef, useCallback } from "react";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { User, Edit2, Check, X, Loader2, CalendarClock } from "lucide-react";
 import { patientApi } from "../api/patients";
 import { appointmentApi } from "../api/appointments";
@@ -47,13 +47,23 @@ function TimelineStrip({
   // "today" marker position
   const todayExact = dateKeys.indexOf(todayStr);
 
+  // max appointments on any single date — used to fix "View details" to a uniform Y
+  const maxStack = Math.max(...[...grouped.values()].map((v) => v.length), 1);
+  const BLOCK_H = 52;
+  const STACK_GAP = 6;
+  const LINE_H = 16; // px per appointment-id line below axis
+  const viewDetailsTop = AXIS_Y + 34 + maxStack * LINE_H;
+
   return (
     <div
       ref={scrollRef}
       className="overflow-x-auto -mx-6 px-6"
       style={{ scrollBehavior: "smooth" }}
     >
-      <div className="relative" style={{ width: totalW, minHeight: 280 }}>
+      <div
+        className="relative"
+        style={{ width: totalW, minHeight: viewDetailsTop + 28 }}
+      >
         {/* Horizontal axis */}
         <div
           className="absolute left-0 h-px bg-gray-200"
@@ -106,8 +116,6 @@ function TimelineStrip({
 
               {/* Appointment blocks — stacked */}
               {colAppts.map((appt, stackIdx) => {
-                const BLOCK_H = 52;
-                const STACK_GAP = 6;
                 const blockTop = 8 + stackIdx * (BLOCK_H + STACK_GAP);
                 const lineStart = blockTop + BLOCK_H;
                 const blockBg =
@@ -128,20 +136,20 @@ function TimelineStrip({
                     {/* Block */}
                     <Link
                       to={`/appointments/${appt.id}`}
-                      className={`absolute rounded-xl px-3 py-2.5 shadow-sm hover:opacity-90 transition-opacity ${blockBg} ${isPast ? "opacity-60" : ""}`}
+                      className={`absolute rounded-xl px-3 py-2.5 shadow-sm hover:opacity-90 transition-opacity flex flex-col items-center justify-center ${blockBg} ${isPast ? "opacity-60" : ""}`}
                       style={{
                         left: centerX,
                         top: blockTop,
-                        width: 148,
+                        width: 168,
                         height: BLOCK_H,
                         transform: "translateX(-50%)",
                       }}
                     >
-                      <p className="text-xs font-semibold truncate leading-tight">
+                      <p className="text-xs font-semibold truncate w-full text-center leading-tight">
                         {appt.centerName}
                       </p>
                       <p
-                        className={`text-xs mt-1.5 flex items-center gap-1 ${statusDot}`}
+                        className={`text-xs flex items-center justify-center gap-1 w-full ${statusDot}`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
                         {appt.approvalStatus}
@@ -177,17 +185,26 @@ function TimelineStrip({
                   <p
                     key={appt.id}
                     className={`text-xs ${isPast ? "text-gray-300" : "text-gray-500"} truncate`}
+                    style={{ height: LINE_H }}
                   >
                     #{appt.id} · {appt.centerName}
                   </p>
                 ))}
-                <Link
-                  to={`/appointments/${colAppts[0].id}`}
-                  className="text-xs text-blue-600 hover:underline"
-                >
-                  View details →
-                </Link>
               </div>
+
+              {/* "View details" pinned at a uniform Y across all columns */}
+              <Link
+                to={`/appointments/${colAppts[0].id}`}
+                className="absolute text-xs text-blue-600 hover:underline"
+                style={{
+                  left: centerX,
+                  top: viewDetailsTop,
+                  transform: "translateX(-50%)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                View details →
+              </Link>
             </Fragment>
           );
         })}
@@ -199,6 +216,7 @@ function TimelineStrip({
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const location = useLocation();
   const [profile, setProfile] = useState<PatientProfileResponse | null>(null);
   const [allAppts, setAllAppts] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -215,6 +233,29 @@ export default function ProfilePage() {
   const [createMode, setCreateMode] = useState(false);
 
   const targetUsername = username ?? user?.email ?? "";
+
+  const fetchTimeline = useCallback(() => {
+    setApptLoading(true);
+    appointmentApi
+      .list()
+      .then((r2) => {
+        const filtered = (r2.data.data ?? []).filter(
+          (a) => a.approvalStatus !== "CANCELLED",
+        );
+        filtered.sort(
+          (a, b) =>
+            new Date(a.appointmentDate).getTime() -
+            new Date(b.appointmentDate).getTime(),
+        );
+        setAllAppts(filtered);
+      })
+      .finally(() => setApptLoading(false));
+  }, []);
+
+  // Re-fetch timeline whenever we navigate back to this page
+  useEffect(() => {
+    fetchTimeline();
+  }, [location.key, fetchTimeline]);
 
   useEffect(() => {
     if (!targetUsername) {
@@ -233,22 +274,6 @@ export default function ProfilePage() {
             age: p.age,
             gender: p.gender ?? "",
           });
-          // Load all appointments for timeline
-          setApptLoading(true);
-          appointmentApi
-            .list()
-            .then((r2) => {
-              const filtered = (r2.data.data ?? []).filter(
-                (a) => a.approvalStatus !== "CANCELLED",
-              );
-              filtered.sort(
-                (a, b) =>
-                  new Date(a.appointmentDate).getTime() -
-                  new Date(b.appointmentDate).getTime(),
-              );
-              setAllAppts(filtered);
-            })
-            .finally(() => setApptLoading(false));
         }
       })
       .catch(() => {
