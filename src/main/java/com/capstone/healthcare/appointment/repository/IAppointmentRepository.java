@@ -14,10 +14,10 @@ import java.util.Set;
 public interface IAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
   /**
-   * viewAppointments — all appointments belonging to a patient by their name.
-   * Uses Spring Data derived query traversing Appointment → Patient → name.
+   * viewAppointments — all appointments belonging to a patient by their name,
+   * ordered newest-first.
    */
-  Set<Appointment> findByPatient_Name(String patientName);
+  List<Appointment> findByPatient_NameOrderByAppointmentDateDesc(String patientName);
 
   /**
    * getAppointmentList — filtered list by center, test name, and status.

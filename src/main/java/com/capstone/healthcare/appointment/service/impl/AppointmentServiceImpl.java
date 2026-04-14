@@ -60,8 +60,8 @@ public class AppointmentServiceImpl implements IAppointmentService {
     }
 
     @Override
-    public Set<Appointment> viewAppointments(String patientName) {
-        return appointmentRepository.findByPatient_Name(patientName);
+    public List<Appointment> viewAppointments(String patientName) {
+        return appointmentRepository.findByPatient_NameOrderByAppointmentDateDesc(patientName);
     }
 
     @Override
