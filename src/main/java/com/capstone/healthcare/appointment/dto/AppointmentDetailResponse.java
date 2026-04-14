@@ -20,6 +20,7 @@ public class AppointmentDetailResponse {
     private LocalDate appointmentDate;
     private ApprovalStatus approvalStatus;
     private String remarks;
+    private String specialRequests;
     private PatientProfileResponse patient;
     private CenterSummary center;
     private Set<TestSearchResponse> diagnosticTests;

@@ -49,8 +49,9 @@ export default function BookAppointmentPage() {
   const [selectedTestIds, setSelectedTestIds] = useState<number[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
 
-  // Step 3 - Date
+  // Step 3 - Date + special requests
   const [appointmentDate, setAppointmentDate] = useState("");
+  const [specialRequests, setSpecialRequests] = useState("");
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
@@ -121,6 +122,7 @@ export default function BookAppointmentPage() {
         centerId: selectedCenter.id,
         testIds: selectedTestIds,
         appointmentDate,
+        specialRequests: specialRequests.trim() || undefined,
       });
       navigate(`/appointments/${res.data.data?.id}`);
     } catch (err: any) {
@@ -347,6 +349,23 @@ export default function BookAppointmentPage() {
             You can book up to 4 tests across 3 different centers per day.
           </p>
 
+          <div className="mt-5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Special Requests{" "}
+              <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              className="input-field resize-none h-24"
+              placeholder="e.g. wheelchair access, stretcher, visual assistance, hearing support, crutches…"
+              value={specialRequests}
+              onChange={(e) => setSpecialRequests(e.target.value)}
+              maxLength={500}
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Let the center know about any accessibility or assistance needs.
+            </p>
+          </div>
+
           <div className="mt-6 flex justify-between">
             <button
               onClick={() => setStep(2)}
@@ -418,6 +437,17 @@ export default function BookAppointmentPage() {
                 })}
               </p>
             </div>
+
+            {specialRequests.trim() && (
+              <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                <p className="text-xs text-amber-600 font-medium mb-1">
+                  Special Requests
+                </p>
+                <p className="text-sm text-gray-700">
+                  {specialRequests.trim()}
+                </p>
+              </div>
+            )}
           </div>
 
           {submitError && (

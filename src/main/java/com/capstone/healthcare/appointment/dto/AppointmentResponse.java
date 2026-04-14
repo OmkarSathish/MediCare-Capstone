@@ -18,4 +18,5 @@ public class AppointmentResponse {
     private String patientName;
     private String centerName;
     private String remarks;
+    private String specialRequests;
 }

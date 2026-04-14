@@ -193,6 +193,7 @@ export default function AdminAppointmentsPage() {
                   <th className="px-5 py-4">Patient</th>
                   <th className="px-5 py-4">Center</th>
                   <th className="px-5 py-4">Date</th>
+                  <th className="px-5 py-4">Requests</th>
                   <th className="px-5 py-4">Status</th>
                   <th className="px-5 py-4">Actions</th>
                 </tr>
@@ -201,7 +202,7 @@ export default function AdminAppointmentsPage() {
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-5 py-16 text-center text-gray-400"
                     >
                       No appointments found.
@@ -226,6 +227,15 @@ export default function AdminAppointmentsPage() {
                         {new Date(a.appointmentDate).toLocaleDateString(
                           "en-US",
                           { month: "short", day: "numeric", year: "numeric" },
+                        )}
+                      </td>
+                      <td className="px-5 py-4 max-w-[180px]">
+                        {a.specialRequests ? (
+                          <span className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 line-clamp-2">
+                            {a.specialRequests}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
                         )}
                       </td>
                       <td className="px-5 py-4">

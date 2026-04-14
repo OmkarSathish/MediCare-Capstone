@@ -166,9 +166,9 @@ export default function AppointmentsPage() {
                       { year: "numeric", month: "long", day: "numeric" },
                     )}
                   </p>
-                  {appt.remarks && (
-                    <p className="text-xs text-gray-400 mt-0.5 italic">
-                      "{appt.remarks}"
+                  {appt.specialRequests && (
+                    <p className="text-xs text-amber-600 mt-0.5 italic">
+                      📋 {appt.specialRequests}
                     </p>
                   )}
                 </div>

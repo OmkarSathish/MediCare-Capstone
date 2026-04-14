@@ -62,6 +62,7 @@ export interface CreateAppointmentRequest {
   centerId: number;
   testIds: number[];
   appointmentDate: string; // ISO date string
+  specialRequests?: string;
 }
 
 export interface AppointmentResponse {
@@ -71,6 +72,7 @@ export interface AppointmentResponse {
   patientName: string;
   centerName: string;
   remarks?: string;
+  specialRequests?: string;
 }
 
 export interface AppointmentDetailResponse {
@@ -78,6 +80,7 @@ export interface AppointmentDetailResponse {
   appointmentDate: string;
   approvalStatus: ApprovalStatus;
   remarks?: string;
+  specialRequests?: string;
   patient: PatientProfileResponse;
   center: { id: number; name: string; address: string };
   diagnosticTests: { id: number; testName: string; testPrice: number }[];

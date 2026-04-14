@@ -12,7 +12,11 @@ import java.util.Set;
 
 @Entity
 @Table(schema = "appointment_schema", name = "appointments")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Appointment {
 
     @Id
@@ -27,7 +31,12 @@ public class Appointment {
     @Column(name = "status", nullable = false)
     private ApprovalStatus approvalStatus;
 
+    /** Set by admin at approve/reject time */
     private String remarks;
+
+    /** Set by patient at booking time — accessibility/assistance needs */
+    @Column(name = "special_requests")
+    private String specialRequests;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
@@ -38,12 +47,7 @@ public class Appointment {
     private DiagnosticCenter diagnosticCenter;
 
     @ManyToMany
-    @JoinTable(
-        schema = "appointment_schema",
-        name = "appointment_tests",
-        joinColumns = @JoinColumn(name = "appointment_id"),
-        inverseJoinColumns = @JoinColumn(name = "test_id")
-    )
+    @JoinTable(schema = "appointment_schema", name = "appointment_tests", joinColumns = @JoinColumn(name = "appointment_id"), inverseJoinColumns = @JoinColumn(name = "test_id"))
     @Builder.Default
     private Set<DiagnosticTest> diagnosticTests = new HashSet<>();
 

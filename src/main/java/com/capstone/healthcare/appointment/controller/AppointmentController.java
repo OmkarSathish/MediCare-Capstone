@@ -56,6 +56,7 @@ public class AppointmentController {
                                 .diagnosticCenter(DiagnosticCenter.builder().id(request.getCenterId()).build())
                                 .diagnosticTests(tests)
                                 .appointmentDate(request.getAppointmentDate())
+                                .specialRequests(request.getSpecialRequests())
                                 .build();
 
                 Appointment saved = appointmentService.addAppointment(appointment);
@@ -181,6 +182,7 @@ public class AppointmentController {
                                 .patientName(a.getPatient().getName())
                                 .centerName(a.getDiagnosticCenter().getName())
                                 .remarks(a.getRemarks())
+                                .specialRequests(a.getSpecialRequests())
                                 .build();
         }
 
@@ -227,6 +229,7 @@ public class AppointmentController {
                                 .appointmentDate(a.getAppointmentDate())
                                 .approvalStatus(a.getApprovalStatus())
                                 .remarks(a.getRemarks())
+                                .specialRequests(a.getSpecialRequests())
                                 .patient(patientDto)
                                 .center(centerDto)
                                 .diagnosticTests(tests)

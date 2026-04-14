@@ -218,9 +218,18 @@ export default function AppointmentDetailPage() {
                 day: "numeric",
               })}
             </p>
+            {appt.specialRequests && (
+              <p className="mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 flex items-start gap-2">
+                <span className="shrink-0">📋</span>
+                <span>
+                  <span className="font-medium">Special requests:</span>{" "}
+                  {appt.specialRequests}
+                </span>
+              </p>
+            )}
             {appt.remarks && (
               <p className="mt-2 text-sm text-gray-500 italic bg-gray-50 rounded-lg px-3 py-2">
-                Remarks: "{appt.remarks}"
+                Admin note: "{appt.remarks}"
               </p>
             )}
           </div>

@@ -24,4 +24,6 @@ public class CreateAppointmentRequest {
     @NotNull
     @Future
     private LocalDate appointmentDate;
+
+    private String specialRequests;
 }
