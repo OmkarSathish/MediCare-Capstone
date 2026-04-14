@@ -343,6 +343,9 @@ export default function BookAppointmentPage() {
           <p className="text-xs text-gray-400 mt-2">
             Appointments can be booked starting from tomorrow.
           </p>
+          <p className="text-xs text-gray-400 mt-1">
+            You can book up to 4 tests across 3 different centers per day.
+          </p>
 
           <div className="mt-6 flex justify-between">
             <button

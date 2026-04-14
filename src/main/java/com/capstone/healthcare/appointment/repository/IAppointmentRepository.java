@@ -13,74 +13,88 @@ import java.util.Set;
 @Repository
 public interface IAppointmentRepository extends JpaRepository<Appointment, Integer> {
 
-        /**
-         * viewAppointments — all appointments belonging to a patient by their name.
-         * Uses Spring Data derived query traversing Appointment → Patient → name.
-         */
-        Set<Appointment> findByPatient_Name(String patientName);
+  /**
+   * viewAppointments — all appointments belonging to a patient by their name.
+   * Uses Spring Data derived query traversing Appointment → Patient → name.
+   */
+  Set<Appointment> findByPatient_Name(String patientName);
 
-        /**
-         * getAppointmentList — filtered list by center, test name, and status.
-         * Passing 0 for status is treated as "any status" at the service layer.
-         */
-        @Query("""
-                        SELECT a FROM Appointment a
-                        JOIN a.diagnosticTests t
-                        WHERE a.diagnosticCenter.id = :centerId
-                          AND t.testName = :testName
-                          AND a.approvalStatus = :status
-                        """)
-        List<Appointment> findByCenterAndTestAndStatus(
-                        @Param("centerId") int centerId,
-                        @Param("testName") String testName,
-                        @Param("status") ApprovalStatus status);
+  /**
+   * getAppointmentList — filtered list by center, test name, and status.
+   * Passing 0 for status is treated as "any status" at the service layer.
+   */
+  @Query("""
+      SELECT a FROM Appointment a
+      JOIN a.diagnosticTests t
+      WHERE a.diagnosticCenter.id = :centerId
+        AND t.testName = :testName
+        AND a.approvalStatus = :status
+      """)
+  List<Appointment> findByCenterAndTestAndStatus(
+      @Param("centerId") int centerId,
+      @Param("testName") String testName,
+      @Param("status") ApprovalStatus status);
 
-        /**
-         * getListOfAppointments — all appointments at a given center by center name.
-         */
-        @Query("SELECT a FROM Appointment a WHERE a.diagnosticCenter.name = :centerName")
-        List<Appointment> findByCenterName(@Param("centerName") String centerName);
+  /**
+   * getListOfAppointments — all appointments at a given center by center name.
+   */
+  @Query("SELECT a FROM Appointment a WHERE a.diagnosticCenter.name = :centerName")
+  List<Appointment> findByCenterName(@Param("centerName") String centerName);
 
-        List<Appointment> findByApprovalStatus(ApprovalStatus status);
+  List<Appointment> findByApprovalStatus(ApprovalStatus status);
 
-        List<Appointment> findByDiagnosticCenter_Id(int centerId);
+  List<Appointment> findByDiagnosticCenter_Id(int centerId);
 
-        List<Appointment> findByDiagnosticCenter_IdAndApprovalStatus(
-                        int centerId, ApprovalStatus status);
+  List<Appointment> findByDiagnosticCenter_IdAndApprovalStatus(
+      int centerId, ApprovalStatus status);
 
-        // ── Dashboard aggregations ────────────────────────────────────────────────
+  /**
+   * Find active (PENDING/APPROVED) appointments for a patient on a specific date.
+   */
+  @Query("""
+      SELECT a FROM Appointment a
+      WHERE a.patient.id = :patientId
+        AND a.appointmentDate = :date
+        AND a.approvalStatus IN :statuses
+      """)
+  List<Appointment> findActiveByPatientAndDate(
+      @Param("patientId") int patientId,
+      @Param("date") java.time.LocalDate date,
+      @Param("statuses") List<ApprovalStatus> statuses);
 
-        /** Total all-time appointments */
-        long countBy();
+  // ── Dashboard aggregations ────────────────────────────────────────────────
 
-        /** Per-status counts */
-        long countByApprovalStatus(ApprovalStatus status);
+  /** Total all-time appointments */
+  long countBy();
 
-        /** Appointments grouped by center: [centerName, count] */
-        @Query("SELECT a.diagnosticCenter.name, COUNT(a) FROM Appointment a GROUP BY a.diagnosticCenter.name ORDER BY COUNT(a) DESC")
-        List<Object[]> countByCenter();
+  /** Per-status counts */
+  long countByApprovalStatus(ApprovalStatus status);
 
-        /** Appointments grouped by year-month: [year, month, count] */
-        @Query("SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COUNT(a) FROM Appointment a GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate) ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)")
-        List<Object[]> countByMonth();
+  /** Appointments grouped by center: [centerName, count] */
+  @Query("SELECT a.diagnosticCenter.name, COUNT(a) FROM Appointment a GROUP BY a.diagnosticCenter.name ORDER BY COUNT(a) DESC")
+  List<Object[]> countByCenter();
 
-        /** Top N most booked tests: [testName, count] */
-        @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t GROUP BY t.testName ORDER BY COUNT(a) DESC")
-        List<Object[]> countByTest();
+  /** Appointments grouped by year-month: [year, month, count] */
+  @Query("SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COUNT(a) FROM Appointment a GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate) ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)")
+  List<Object[]> countByMonth();
 
-        // ── Center-scoped dashboard aggregations ──────────────────────────────────
+  /** Top N most booked tests: [testName, count] */
+  @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t GROUP BY t.testName ORDER BY COUNT(a) DESC")
+  List<Object[]> countByTest();
 
-        /** Total appointments at a given center */
-        long countByDiagnosticCenter_Id(int centerId);
+  // ── Center-scoped dashboard aggregations ──────────────────────────────────
 
-        /** Per-status count at a given center */
-        long countByDiagnosticCenter_IdAndApprovalStatus(int centerId, ApprovalStatus status);
+  /** Total appointments at a given center */
+  long countByDiagnosticCenter_Id(int centerId);
 
-        /** Appointments by month at a given center: [year, month, count] */
-        @Query("SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COUNT(a) FROM Appointment a WHERE a.diagnosticCenter.id = :centerId GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate) ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)")
-        List<Object[]> countByMonthForCenter(@Param("centerId") int centerId);
+  /** Per-status count at a given center */
+  long countByDiagnosticCenter_IdAndApprovalStatus(int centerId, ApprovalStatus status);
 
-        /** Top tests booked at a given center: [testName, count] */
-        @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t WHERE a.diagnosticCenter.id = :centerId GROUP BY t.testName ORDER BY COUNT(a) DESC")
-        List<Object[]> countByTestForCenter(@Param("centerId") int centerId);
+  /** Appointments by month at a given center: [year, month, count] */
+  @Query("SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COUNT(a) FROM Appointment a WHERE a.diagnosticCenter.id = :centerId GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate) ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)")
+  List<Object[]> countByMonthForCenter(@Param("centerId") int centerId);
+
+  /** Top tests booked at a given center: [testName, count] */
+  @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t WHERE a.diagnosticCenter.id = :centerId GROUP BY t.testName ORDER BY COUNT(a) DESC")
+  List<Object[]> countByTestForCenter(@Param("centerId") int centerId);
 }
