@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTitle } from "../hooks/useTitle";
 import {
   Microscope,
   Plus,
@@ -34,6 +35,7 @@ const emptyForm: TestForm = {
 };
 
 export default function AdminTestsPage() {
+  useTitle("Manage Tests");
   const { isCenterAdmin, isStaffAdmin, adminCenterId } = useAuth();
 
   // ── Center admin state ─────────────────────────────────────────────────────

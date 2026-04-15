@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Building2,
   Plus,
@@ -37,6 +38,7 @@ const emptyForm: CenterForm = {
 };
 
 export default function AdminCentersPage() {
+  useTitle("Manage Centers");
   const [centers, setCenters] = useState<CenterResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

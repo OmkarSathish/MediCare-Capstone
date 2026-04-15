@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Building2,
   Microscope,
@@ -22,6 +23,7 @@ import { useAuth } from "../context/AuthContext";
 type Step = 1 | 2 | 3 | 4;
 
 export default function BookAppointmentPage() {
+  useTitle("Book Appointment");
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 

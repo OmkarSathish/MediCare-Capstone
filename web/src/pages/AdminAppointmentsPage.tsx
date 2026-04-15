@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import { Loader2, ChevronRight, Check, X, Search } from "lucide-react";
 import { adminAppointmentApi } from "../api/appointments";
 import { StatusBadge } from "../components/StatusBadge";
@@ -7,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import type { AppointmentResponse, ApprovalStatus } from "../types";
 
 export default function AdminAppointmentsPage() {
+  useTitle("Manage Appointments");
   const { isCenterAdmin, adminCenterId } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);

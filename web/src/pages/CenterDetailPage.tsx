@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Building2,
   MapPin,
@@ -20,6 +21,7 @@ export default function CenterDetailPage() {
   const { isAdmin } = useAuth();
   const { id } = useParams<{ id: string }>();
   const [center, setCenter] = useState<CenterResponse | null>(null);
+  useTitle(center?.name ?? "Center Details");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 

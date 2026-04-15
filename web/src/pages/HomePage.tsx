@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   ArrowRight,
   Shield,
@@ -87,6 +88,7 @@ const testimonials = [
 ];
 
 export default function HomePage() {
+  useTitle("Home");
   const { user, isAdmin, isCenterAdmin, isStaffAdmin } = useAuth();
 
   return (

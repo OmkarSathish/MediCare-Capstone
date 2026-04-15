@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTitle } from "../hooks/useTitle";
 import {
   UserCog,
   Building2,
@@ -28,6 +29,7 @@ const emptyForm: CreateForm = {
 };
 
 export default function AdminCenterAdminsPage() {
+  useTitle("Manage Center Admins");
   const [centerAdmins, setCenterAdmins] = useState<UserProfileResponse[]>([]);
   const [centers, setCenters] = useState<CenterSearchResponse[]>([]);
   const [loading, setLoading] = useState(true);

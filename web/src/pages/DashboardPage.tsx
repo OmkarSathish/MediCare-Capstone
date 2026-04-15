@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, User, ChevronRight, Plus, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useTitle } from "../hooks/useTitle";
 import { appointmentApi } from "../api/appointments";
 import { patientApi } from "../api/patients";
 import { StatusBadge } from "../components/StatusBadge";
 import type { AppointmentResponse, PatientProfileResponse } from "../types";
 
 export default function DashboardPage() {
+  useTitle("Dashboard");
   const { user, isAdmin } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [patient, setPatient] = useState<PatientProfileResponse | null>(null);

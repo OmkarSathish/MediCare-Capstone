@@ -4,8 +4,10 @@ import { testsApi } from "../api/tests";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import type { TestResponse } from "../types";
+import { useTitle } from "../hooks/useTitle";
 
 export default function TestsPage() {
+  useTitle("Diagnostic Tests");
   const { isAdmin } = useAuth();
   const [tests, setTests] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(true);

@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Activity, Loader2 } from "lucide-react";
 import { authApi } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
+import { useTitle } from "../hooks/useTitle";
 
 export default function SignupPage() {
+  useTitle("Sign Up");
   const navigate = useNavigate();
   const { login } = useAuth();
   const [form, setForm] = useState({

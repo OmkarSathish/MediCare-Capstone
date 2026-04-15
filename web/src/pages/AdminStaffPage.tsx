@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { UserCog, Plus, Trash2, Loader2, X, Eye, EyeOff } from "lucide-react";
+import { useTitle } from "../hooks/useTitle";
 import { authApi } from "../api/auth";
 import type { UserProfileResponse } from "../types";
 
@@ -12,6 +13,7 @@ interface CreateForm {
 const emptyForm: CreateForm = { fullName: "", email: "", password: "" };
 
 export default function AdminStaffPage() {
+  useTitle("Manage Staff");
   const [staff, setStaff] = useState<UserProfileResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);

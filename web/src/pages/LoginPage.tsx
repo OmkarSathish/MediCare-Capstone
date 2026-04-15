@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Activity, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useTitle } from "../hooks/useTitle";
 
 export default function LoginPage() {
+  useTitle("Login");
   const { login, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", password: "" });

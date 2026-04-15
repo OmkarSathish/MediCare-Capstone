@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { Search, MapPin, ChevronRight, Building2, Loader2 } from "lucide-react";
 import { centersApi } from "../api/centers";
 import type { CenterSearchResponse } from "../types";
+import { useTitle } from "../hooks/useTitle";
 
 export default function CentersPage() {
+  useTitle("Diagnostic Centers");
   const [centers, setCenters] = useState<CenterSearchResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Microscope,
   Clock,
@@ -39,6 +40,7 @@ const BAR_COLOR = "#3b82f6";
 const LINE_COLOR = "#6366f1";
 
 export default function AdminDashboardPage() {
+  useTitle("Admin Dashboard");
   const { isCenterAdmin, isStaffAdmin, adminCenterId } = useAuth();
   const [stats, setStats] = useState<AdminDashboardResponse | null>(null);
   const [centerStats, setCenterStats] =

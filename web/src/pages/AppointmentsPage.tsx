@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Calendar,
   ChevronRight,
@@ -14,6 +15,7 @@ import { StatusBadge } from "../components/StatusBadge";
 import type { AppointmentResponse } from "../types";
 
 export default function AppointmentsPage() {
+  useTitle("My Appointments");
   const { isAdmin } = useAuth();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);

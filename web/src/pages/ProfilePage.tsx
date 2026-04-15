@@ -1,5 +1,6 @@
 import { useEffect, useState, Fragment, useRef, useCallback } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import { User, Edit2, Check, X, Loader2, CalendarClock } from "lucide-react";
 import { patientApi } from "../api/patients";
 import { appointmentApi } from "../api/appointments";
@@ -216,6 +217,7 @@ function TimelineStrip({
 export default function ProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  useTitle(username ? `${username}'s Profile` : "My Profile");
   const location = useLocation();
   const [profile, setProfile] = useState<PatientProfileResponse | null>(null);
   const [allAppts, setAllAppts] = useState<AppointmentResponse[]>([]);

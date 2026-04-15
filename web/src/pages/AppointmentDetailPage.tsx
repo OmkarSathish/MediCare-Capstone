@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTitle } from "../hooks/useTitle";
 import {
   Calendar,
   Building2,
@@ -24,6 +25,7 @@ export default function AppointmentDetailPage() {
   const { isAdmin, isCenterAdmin, isStaffAdmin } = useAuth();
   const isAdminRole = isAdmin || isCenterAdmin || isStaffAdmin;
   const [appt, setAppt] = useState<AppointmentDetailResponse | null>(null);
+  useTitle(appt ? `Appointment at ${appt.center.name}` : "Appointment Details");
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
