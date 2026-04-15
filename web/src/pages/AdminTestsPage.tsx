@@ -208,6 +208,7 @@ export default function AdminTestsPage() {
     const filteredCenter = centerTests.filter(
       (t) =>
         t.testName.toLowerCase().includes(centerSearch.toLowerCase()) ||
+        // @ts-ignore
         (t.categoryName ?? "")
           .toLowerCase()
           .includes(centerSearch.toLowerCase()),
