@@ -18,17 +18,6 @@ export default function Footer() {
               Comprehensive healthcare diagnostic services — connecting patients
               with trusted diagnostic centers.
             </p>
-            <div className="flex gap-3">
-              {["F", "T", "In", "Li"].map((label, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-8 h-8 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors text-xs font-bold text-gray-400 hover:text-white"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Quick Links */}
