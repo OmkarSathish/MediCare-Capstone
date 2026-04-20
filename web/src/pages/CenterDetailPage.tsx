@@ -45,7 +45,7 @@ export default function CenterDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <p className="text-red-500">{error || "Center not found."}</p>
-        <Link to="/centers" className="btn-primary inline-flex mt-4">
+        <Link to={isAdmin ? "/admin/centers" : "/centers"} className="btn-primary inline-flex mt-4">
           Back to Centers
         </Link>
       </div>
@@ -54,7 +54,7 @@ export default function CenterDetailPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <Link
-        to="/centers"
+        to={isAdmin ? "/admin/centers" : "/centers"}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Centers
