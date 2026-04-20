@@ -84,12 +84,45 @@ class ValidWorkflowIntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
     @BeforeEach
     void seedOnce() {
-        if (roleRepository.count() > 0)
-            return; // already seeded
+        // Idempotent: check for this class's specific users, not just role count,
+        // so the seeder works correctly even when InvalidWorkflowIntegrationTest
+        // has already populated roles in the same JVM / shared H2 instance.
+        if (userRepository.findByEmail("admin@test.com").isPresent()) {
+            // Tokens may be null if another test class ran first in the same JVM —
+            // re-derive them from the already-persisted users.
+            if (adminToken == null) {
+                adminToken = authTokenService.generateToken(
+                        userRepository.findByEmail("admin@test.com").get());
+            }
+            if (centerAdminToken == null) {
+                userRepository.findByEmail("centeradmin@test.com")
+                        .ifPresent(u -> centerAdminToken = authTokenService.generateToken(u));
+            }
+            if (centerId == 0) {
+                centerRepository.findAll().stream()
+                        .filter(c -> c.getName().startsWith("City Health Lab"))
+                        .findFirst()
+                        .ifPresent(c -> centerId = c.getId());
+            }
+            if (testId == 0) {
+                testRepository.findAll().stream()
+                        .filter(t -> t.getTestName().equals("Complete Blood Count"))
+                        .findFirst()
+                        .ifPresent(t -> testId = t.getId());
+            }
+            return;
+        }
 
-        Role customerRole = roleRepository.save(Role.builder().roleName(RoleConstants.CUSTOMER).build());
-        Role adminRole = roleRepository.save(Role.builder().roleName(RoleConstants.ADMIN).build());
-        Role centerAdminRole = roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_ADMIN).build());
+        // Ensure roles exist (may already be there from InvalidWorkflowIntegrationTest)
+        if (roleRepository.findByRoleName(RoleConstants.CUSTOMER).isEmpty())
+            roleRepository.save(Role.builder().roleName(RoleConstants.CUSTOMER).build());
+        if (roleRepository.findByRoleName(RoleConstants.ADMIN).isEmpty())
+            roleRepository.save(Role.builder().roleName(RoleConstants.ADMIN).build());
+        if (roleRepository.findByRoleName(RoleConstants.CENTER_ADMIN).isEmpty())
+            roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_ADMIN).build());
+
+        Role adminRole = roleRepository.findByRoleName(RoleConstants.ADMIN).get();
+        Role centerAdminRole = roleRepository.findByRoleName(RoleConstants.CENTER_ADMIN).get();
 
         // Primary admin user
         UserAccount admin = userRepository.save(UserAccount.builder()
