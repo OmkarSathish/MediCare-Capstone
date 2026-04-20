@@ -338,7 +338,7 @@ export default function AdminTestsPage() {
                             {t.testName}
                           </p>
                           <p className="text-blue-600 text-xs font-medium">
-                            ₱{t.testPrice.toFixed(2)}
+                            ₹{t.testPrice.toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -376,12 +376,12 @@ export default function AdminTestsPage() {
                               }
                               className="text-xs text-indigo-600 hover:underline"
                             >
-                              Use suggested ₱
+                              Use suggested ₹
                               {priceSuggestion.suggestedPrice.toFixed(2)}
                             </button>
                           ) : null}
                           <div className="flex items-center gap-2">
-                            <span className="text-gray-400 text-sm">₱</span>
+                            <span className="text-gray-400 text-sm">₹</span>
                             <input
                               type="number"
                               min="0"
@@ -454,7 +454,7 @@ export default function AdminTestsPage() {
                           {t.testName}
                         </p>
                         <p className="text-blue-600 text-xs font-medium">
-                          ₱{t.testPrice.toFixed(2)}
+                          ₹{t.testPrice.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -676,7 +676,7 @@ export default function AdminTestsPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-400">Price</span>
                   <span className="font-bold text-blue-600">
-                    ₱{test.testPrice.toFixed(2)}
+                    ₹{test.testPrice.toFixed(2)}
                   </span>
                 </div>
                 {test.categoryName && (
@@ -726,7 +726,7 @@ export default function AdminTestsPage() {
                   {pricesTest.testName}
                 </h3>
                 <p className="text-sm text-gray-400">
-                  Default price: ₱{pricesTest.testPrice.toFixed(2)}
+                  Default price: ₹{pricesTest.testPrice.toFixed(2)}
                 </p>
               </div>
               <button
@@ -774,7 +774,7 @@ export default function AdminTestsPage() {
                         idx === 0 ? "text-green-600" : "text-gray-700"
                       }`}
                     >
-                      ₱{entry.price.toFixed(2)}
+                      ₹{entry.price.toFixed(2)}
                     </span>
                   </div>
                 ))}
