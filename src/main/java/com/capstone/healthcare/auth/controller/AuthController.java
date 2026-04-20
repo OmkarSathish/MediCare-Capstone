@@ -111,18 +111,6 @@ public class AuthController {
                 return ResponseEntity.ok(ApiResponse.ok(toProfile(user)));
         }
 
-        // ── POST /api/auth/admin/register ────────────────────────────────────────
-        @PostMapping("/admin/register")
-        @PreAuthorize("hasRole('" + RoleConstants.ADMIN + "')")
-        @Operation(summary = "Register a new admin account (primary admin only)")
-        public ResponseEntity<ApiResponse<Void>> registerAdmin(
-                        @Valid @RequestBody SignupRequest request) {
-
-                adminService.registerAdmin(request.getEmail(), request.getPassword());
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.ok("Admin account created", null));
-        }
-
         // ── POST /api/auth/admin/center-admins ───────────────────────────────────
         @PostMapping("/admin/center-admins")
         @PreAuthorize("hasRole('" + RoleConstants.ADMIN + "')")
@@ -161,7 +149,7 @@ public class AuthController {
         @PreAuthorize("hasRole('" + RoleConstants.CENTER_ADMIN + "')")
         @Operation(summary = "Create a staff admin account for the calling center admin's center")
         public ResponseEntity<ApiResponse<Void>> registerCenterStaff(
-                        @Valid @RequestBody CreateCenterAdminRequest request,
+                        @Valid @RequestBody CreateStaffRequest request,
                         @AuthenticationPrincipal UserPrincipal principal) {
 
                 int centerId = principal.getCenterId() != null ? principal.getCenterId() : 0;
