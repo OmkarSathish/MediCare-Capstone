@@ -3,7 +3,6 @@ import type {
   ApiResponse,
   PatientProfileRequest,
   PatientProfileResponse,
-  TestResultResponse,
 } from "../types";
 
 export const patientApi = {
@@ -15,10 +14,4 @@ export const patientApi = {
 
   updateProfile: (username: string, data: PatientProfileRequest) =>
     api.put<ApiResponse<PatientProfileResponse>>(`/patients/${username}`, data),
-
-  getResults: (username: string) =>
-    api.get<ApiResponse<TestResultResponse[]>>(`/patients/${username}/results`),
-
-  getResult: (id: number) =>
-    api.get<ApiResponse<TestResultResponse>>(`/patients/results/${id}`),
 };

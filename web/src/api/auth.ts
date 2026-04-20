@@ -19,11 +19,6 @@ export const authApi = {
   logout: (refreshToken: string) =>
     api.post<ApiResponse<void>>("/auth/logout", { refreshToken }),
 
-  refreshToken: (refreshToken: string) =>
-    api.post<ApiResponse<AuthResponse>>("/auth/token/refresh", {
-      refreshToken,
-    }),
-
   listCenterAdmins: () =>
     api.get<ApiResponse<UserProfileResponse[]>>("/auth/admin/center-admins"),
 

@@ -1,6 +1,5 @@
 package com.capstone.healthcare.diagnosticcenter.controller;
 
-import com.capstone.healthcare.appointment.model.Appointment;
 import com.capstone.healthcare.diagnosticcenter.dto.*;
 import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 import com.capstone.healthcare.diagnosticcenter.model.DiagnosticCenter;
@@ -66,30 +65,6 @@ public class DiagnosticCenterController {
                                 .map(this::toOfferingResponse)
                                 .collect(Collectors.toSet());
                 return ResponseEntity.ok(ApiResponse.ok(offerings));
-        }
-
-        // ── GET /api/centers/{id}/tests/{testName} ────────────────────────────────
-        @GetMapping("/{id}/tests/{testName}")
-        @Operation(summary = "Get details of a specific test offered at a center")
-        public ResponseEntity<ApiResponse<CenterTestOfferingResponse>> viewTestDetails(
-                        @PathVariable int id,
-                        @PathVariable String testName) {
-
-                CenterTestOffering offering = centerService.viewTestOffering(id, testName);
-                return ResponseEntity.ok(ApiResponse.ok(toOfferingResponse(offering)));
-        }
-
-        // ── GET /api/centers/{id}/appointments ────────────────────────────────────
-        @GetMapping("/{id}/appointments")
-        @PreAuthorize("hasRole('ADMIN')")
-        @Operation(summary = "Get all appointments at a center (admin only)")
-        public ResponseEntity<ApiResponse<List<AppointmentSummary>>> getAppointments(
-                        @PathVariable int id) {
-
-                DiagnosticCenter center = centerService.getDiagnosticCenterById(id);
-                List<Appointment> appointments = centerService.getListOfAppointments(center.getName());
-                return ResponseEntity.ok(ApiResponse.ok(
-                                appointments.stream().map(this::toAppointmentSummary).toList()));
         }
 
         // ── GET /api/centers/offering/{testId} ────────────────────────────────────
@@ -245,15 +220,6 @@ public class DiagnosticCenterController {
                                 .build();
         }
 
-        private AppointmentSummary toAppointmentSummary(Appointment a) {
-                return AppointmentSummary.builder()
-                                .appointmentId(a.getId())
-                                .patientName(a.getPatient().getName())
-                                .appointmentDate(a.getAppointmentDate())
-                                .status(a.getApprovalStatus().name())
-                                .build();
-        }
-
         private DiagnosticCenter fromCreateRequest(CreateCenterRequest req) {
                 return DiagnosticCenter.builder()
                                 .name(req.getName())
@@ -279,16 +245,4 @@ public class DiagnosticCenterController {
                                 .build();
         }
 
-        // ── inline projection DTO for appointment list ────────────────────────────
-        @lombok.Getter
-        @lombok.Setter
-        @lombok.NoArgsConstructor
-        @lombok.AllArgsConstructor
-        @lombok.Builder
-        public static class AppointmentSummary {
-                private int appointmentId;
-                private String patientName;
-                private java.time.LocalDate appointmentDate;
-                private String status;
-        }
 }

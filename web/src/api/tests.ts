@@ -7,11 +7,6 @@ export const testsApi = {
       params: search ? { search } : undefined,
     }),
 
-  getById: (id: number) => api.get<ApiResponse<TestResponse>>(`/tests/${id}`),
-
-  getByCategory: (categoryId: number) =>
-    api.get<ApiResponse<TestResponse[]>>(`/tests/category/${categoryId}`),
-
   create: (data: {
     testName: string;
     testPrice: number;

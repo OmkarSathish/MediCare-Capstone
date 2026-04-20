@@ -3,7 +3,6 @@ import type {
   ApiResponse,
   AppointmentDetailResponse,
   AppointmentResponse,
-  AppointmentStatusResponse,
   CreateAppointmentRequest,
 } from "../types";
 
@@ -18,11 +17,6 @@ export const appointmentApi = {
 
   getById: (id: number) =>
     api.get<ApiResponse<AppointmentDetailResponse>>(`/appointments/${id}`),
-
-  getStatus: (id: number) =>
-    api.get<ApiResponse<AppointmentStatusResponse>>(
-      `/appointments/${id}/status`,
-    ),
 
   cancel: (id: number) =>
     api.delete<ApiResponse<AppointmentResponse>>(`/appointments/${id}`),

@@ -47,13 +47,6 @@ export interface PatientProfileResponse {
   username: string;
 }
 
-export interface TestResultResponse {
-  id: number;
-  testReading: string;
-  medicalCondition: string;
-  appointmentId: number;
-}
-
 // ─── Appointment ──────────────────────────────────────────────────────────────
 
 export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
@@ -95,12 +88,6 @@ export interface StatusHistoryEntry {
   comments?: string;
 }
 
-export interface AppointmentStatusResponse {
-  appointmentId: number;
-  currentStatus: ApprovalStatus;
-  history: StatusHistoryEntry[];
-}
-
 // ─── Diagnostic Center ────────────────────────────────────────────────────────
 
 export interface CenterSearchResponse {
@@ -135,12 +122,6 @@ export interface TestResponse {
   testPrice: number;
   status: string;
   categoryName?: string;
-}
-
-export interface TestSearchResponse {
-  id: number;
-  testName: string;
-  testPrice: number;
 }
 
 // ─── Admin ────────────────────────────────────────────────────────────────────

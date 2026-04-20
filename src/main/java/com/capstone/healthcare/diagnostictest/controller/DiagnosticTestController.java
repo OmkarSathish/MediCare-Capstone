@@ -63,16 +63,6 @@ public class DiagnosticTestController {
         return ResponseEntity.ok(ApiResponse.ok(toResponse(test)));
     }
 
-    // ── GET /api/tests/category/{categoryId} ─────────────────────────────────
-    @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Get all tests belonging to a category")
-    public ResponseEntity<ApiResponse<List<TestSearchResponse>>> getTestsByCategory(
-            @PathVariable int categoryId) {
-
-        List<DiagnosticTest> tests = testCatalogService.getTestsByCategory(categoryId);
-        return ResponseEntity.ok(ApiResponse.ok(tests.stream().map(this::toSearchResponse).toList()));
-    }
-
     // ── POST /api/tests ───────────────────────────────────────────────────────
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -118,14 +108,6 @@ public class DiagnosticTestController {
                 .testPrice(t.getTestPrice())
                 .status(t.getStatus())
                 .categoryName(t.getCategory() != null ? t.getCategory().getCategoryName() : null)
-                .build();
-    }
-
-    private TestSearchResponse toSearchResponse(DiagnosticTest t) {
-        return TestSearchResponse.builder()
-                .id(t.getId())
-                .testName(t.getTestName())
-                .testPrice(t.getTestPrice())
                 .build();
     }
 

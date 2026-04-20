@@ -102,31 +102,6 @@ public class AppointmentController {
                 return ResponseEntity.ok(ApiResponse.ok(toDetailResponse(appointment, history)));
         }
 
-        // ── GET /api/appointments/{id}/status ─────────────────────────────────────
-        @GetMapping("/{id}/status")
-        @Operation(summary = "Get approval status and history for an appointment")
-        public ResponseEntity<ApiResponse<AppointmentStatusResponse>> getStatus(
-                        @PathVariable int id,
-                        @AuthenticationPrincipal UserPrincipal principal) {
-
-                Appointment appointment = appointmentService.viewAppointment(id);
-                enforceOwnerOrAdmin(appointment, principal);
-
-                List<AppointmentStatusHistory> history = appointmentStatusService.getStatusHistory(id);
-                AppointmentStatusResponse response = AppointmentStatusResponse.builder()
-                                .appointmentId(id)
-                                .currentStatus(appointment.getApprovalStatus())
-                                .history(history.stream().map(h -> AppointmentStatusResponse.StatusEntry.builder()
-                                                .previousStatus(h.getPreviousStatus())
-                                                .newStatus(h.getNewStatus())
-                                                .changedBy(h.getChangedBy())
-                                                .changedAt(h.getChangedAt())
-                                                .comments(h.getComments())
-                                                .build()).toList())
-                                .build();
-                return ResponseEntity.ok(ApiResponse.ok(response));
-        }
-
         // ── DELETE /api/appointments/{id} ─────────────────────────────────────────
         @DeleteMapping("/{id}")
         @Operation(summary = "Cancel an appointment (soft delete — sets status to CANCELLED)")
