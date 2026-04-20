@@ -45,7 +45,10 @@ export default function CenterDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <p className="text-red-500">{error || "Center not found."}</p>
-        <Link to={isAdmin ? "/admin/centers" : "/centers"} className="btn-primary inline-flex mt-4">
+        <Link
+          to={isAdmin ? "/admin/centers" : "/centers"}
+          className="btn-primary inline-flex mt-4"
+        >
           Back to Centers
         </Link>
       </div>

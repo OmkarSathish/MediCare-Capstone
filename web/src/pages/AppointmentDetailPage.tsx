@@ -111,7 +111,10 @@ export default function AppointmentDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <p className="text-red-500">{error || "Not found."}</p>
-        <Link to="/appointments" className="btn-primary inline-flex mt-4">
+        <Link
+          to={isAdminRole ? "/admin/appointments" : "/appointments"}
+          className="btn-primary inline-flex mt-4"
+        >
           Back to Appointments
         </Link>
       </div>
@@ -195,7 +198,7 @@ export default function AppointmentDetailPage() {
         </div>
       )}
       <Link
-        to="/appointments"
+        to={isAdminRole ? "/admin/appointments" : "/appointments"}
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-6"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Appointments
