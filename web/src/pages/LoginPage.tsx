@@ -13,6 +13,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const DEMO_CREDENTIALS = [
+    { role: "Admin", email: "admin@healthcare.com", password: "Admin@1234", color: "bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200" },
+    { role: "Center Admin", email: "admin.healthfirst@healthcare.ph", password: "admin@1234", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
+    { role: "Center Staff", email: "staff1.healthfirst@healthcare.ph", password: "staff@1234", color: "bg-teal-100 text-teal-700 hover:bg-teal-200 border-teal-200" },
+    { role: "Patient", email: "juan.santos0@example.com", password: "Patient@1234", color: "bg-green-100 text-green-700 hover:bg-green-200 border-green-200" },
+  ] as const;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -128,6 +135,26 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
+        </div>
+
+        {/* Demo credentials */}
+        <div className="mt-4 card shadow-xl border-0">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            Demo Credentials
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {DEMO_CREDENTIALS.map((c) => (
+              <button
+                key={c.role}
+                type="button"
+                onClick={() => setForm({ username: c.email, password: c.password })}
+                className={`text-left px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors ${c.color}`}
+              >
+                <span className="block font-semibold">{c.role}</span>
+                <span className="block truncate opacity-75">{c.email}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
