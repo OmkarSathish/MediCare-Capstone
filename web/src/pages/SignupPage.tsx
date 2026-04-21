@@ -19,6 +19,9 @@ export default function SignupPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+
+  const PHONE_RE = /^(\+91[\-\s]?|0)?[6-9]\d{9}$/;
 
   const handleChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -27,6 +30,14 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setPhoneError("");
+
+    if (form.phone && !PHONE_RE.test(form.phone)) {
+      setPhoneError(
+        "Enter a valid 10-digit Indian mobile number (e.g. 98765 43210 or +91 98765 43210).",
+      );
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -127,11 +138,18 @@ export default function SignupPage() {
               </label>
               <input
                 type="tel"
-                className="input-field"
-                placeholder="+1 (555) 000-0000"
+                className={`input-field ${phoneError ? "border-red-400 focus:ring-red-300" : ""}`}
+                placeholder="+91 98765 43210"
                 value={form.phone}
-                onChange={handleChange("phone")}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9+\s\-]/g, "");
+                  setForm({ ...form, phone: val });
+                  setPhoneError("");
+                }}
               />
+              {phoneError && (
+                <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+              )}
             </div>
 
             <div>

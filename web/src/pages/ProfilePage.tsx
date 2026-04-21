@@ -226,6 +226,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [form, setForm] = useState<PatientProfileRequest>({
     name: "",
     phoneNo: "",
@@ -289,7 +290,16 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, [targetUsername]);
 
+  const PHONE_RE = /^(\+91[\-\s]?|0)?[6-9]\d{9}$/;
+
   const handleSave = async () => {
+    setPhoneError("");
+    if (form.phoneNo && !PHONE_RE.test(form.phoneNo)) {
+      setPhoneError(
+        "Enter a valid 10-digit Indian mobile number (e.g. 98765 43210 or +91 98765 43210).",
+      );
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -433,10 +443,19 @@ export default function ProfilePage() {
               </label>
               <input
                 type="tel"
-                className="input-field"
+                className={`input-field ${phoneError ? "border-red-400 focus:ring-red-300" : ""}`}
                 value={form.phoneNo}
-                onChange={(e) => setForm({ ...form, phoneNo: e.target.value })}
+                placeholder="+91 98765 43210"
+                onChange={(e) => {
+                  // Allow only digits, +, spaces, dashes
+                  const val = e.target.value.replace(/[^0-9+\s\-]/g, "");
+                  setForm({ ...form, phoneNo: val });
+                  setPhoneError("");
+                }}
               />
+              {phoneError && (
+                <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+              )}
             </div>
 
             <div className="flex gap-3 pt-2">
