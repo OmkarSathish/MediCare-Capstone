@@ -362,7 +362,7 @@ export default function HomePage() {
             {steps.map(({ step, title, desc }, index) => (
               <div key={step} className="relative">
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-blue-100 -translate-x-4 z-0" />
+                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-blue-100 -translate-x-60 z-0" />
                 )}
                 <div className="relative z-10">
                   <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-200">
