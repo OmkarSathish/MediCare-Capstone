@@ -29,6 +29,18 @@ spring:
   flyway:
     enabled: false
 
+  mail:
+    host: localhost
+    port: 25
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
 security:
   jwt:
     secret: test-secret-key-that-is-at-least-32-chars-long!!

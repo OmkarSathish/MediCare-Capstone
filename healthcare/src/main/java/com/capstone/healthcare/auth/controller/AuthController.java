@@ -4,6 +4,7 @@ import com.capstone.healthcare.auth.dto.*;
 import com.capstone.healthcare.auth.model.UserAccount;
 import com.capstone.healthcare.auth.service.IAdminService;
 import com.capstone.healthcare.auth.service.IAuthTokenService;
+import com.capstone.healthcare.auth.service.IPasswordResetService;
 import com.capstone.healthcare.auth.service.IUserService;
 import com.capstone.healthcare.auth.service.impl.AuthTokenServiceImpl;
 import com.capstone.healthcare.shared.response.ApiResponse;
@@ -33,6 +34,7 @@ public class AuthController {
         private final IAdminService adminService;
         private final IAuthTokenService authTokenService;
         private final AuthTokenServiceImpl authTokenServiceImpl;
+        private final IPasswordResetService passwordResetService;
 
         @Value("${security.jwt.expiration-ms}")
         private long expirationMs;
@@ -183,6 +185,27 @@ public class AuthController {
                 int centerId = principal.getCenterId() != null ? principal.getCenterId() : 0;
                 adminService.removeCenterStaff(id, centerId);
                 return ResponseEntity.ok(ApiResponse.ok("Staff admin removed", null));
+        }
+
+        // ── POST /api/auth/forgot-password ───────────────────────────────────────
+        @PostMapping("/forgot-password")
+        @Operation(summary = "Send a 6-digit OTP to the given email for password reset")
+        public ResponseEntity<ApiResponse<Void>> forgotPassword(
+                        @Valid @RequestBody ForgotPasswordRequest request) {
+
+                passwordResetService.sendOtp(request.getEmail());
+                return ResponseEntity.ok(ApiResponse.ok("OTP sent to your email address", null));
+        }
+
+        // ── POST /api/auth/reset-password ────────────────────────────────────────
+        @PostMapping("/reset-password")
+        @Operation(summary = "Verify OTP and set a new password")
+        public ResponseEntity<ApiResponse<Void>> resetPassword(
+                        @Valid @RequestBody ResetPasswordRequest request) {
+
+                passwordResetService.resetPassword(
+                                request.getEmail(), request.getOtp(), request.getNewPassword());
+                return ResponseEntity.ok(ApiResponse.ok("Password reset successfully", null));
         }
 
         // ── helpers ──────────────────────────────────────────────────────────────
