@@ -43,4 +43,14 @@ export const authApi = {
 
   removeCenterStaff: (userId: number) =>
     api.delete<ApiResponse<void>>(`/auth/center-admin/staff/${userId}`),
+
+  forgotPassword: (email: string) =>
+    api.post<ApiResponse<void>>("/auth/forgot-password", { email }),
+
+  resetPassword: (email: string, otp: string, newPassword: string) =>
+    api.post<ApiResponse<void>>("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    }),
 };
