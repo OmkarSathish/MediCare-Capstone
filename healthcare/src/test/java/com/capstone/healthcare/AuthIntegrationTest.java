@@ -35,20 +35,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Auth integration tests — 14 cases:
  *
- * A1  — GET  /api/auth/me                              → 200 OK with profile
- * A2  — POST /api/auth/token/refresh (valid token)     → 200 OK, new access token
- * A3  — POST /api/auth/token/refresh (bogus token)     → 404 Not Found
- * A4  — POST /api/auth/logout                          → 200 OK, token revoked
- * A5  — ADMIN creates CENTER_ADMIN                     → 201 Created
- * A6  — ADMIN lists center admins                      → 200 OK, non-empty list
- * A7  — ADMIN removes CENTER_ADMIN                     → 200 OK
- * A8  — CENTER_ADMIN creates staff member              → 201 Created
- * A9  — CENTER_ADMIN lists staff for their center      → 200 OK
- * A10 — CENTER_ADMIN removes their own staff           → 200 OK
+ * A1 — GET /api/auth/me → 200 OK with profile
+ * A2 — POST /api/auth/token/refresh (valid token) → 200 OK, new access token
+ * A3 — POST /api/auth/token/refresh (bogus token) → 404 Not Found
+ * A4 — POST /api/auth/logout → 200 OK, token revoked
+ * A5 — ADMIN creates CENTER_ADMIN → 201 Created
+ * A6 — ADMIN lists center admins → 200 OK, non-empty list
+ * A7 — ADMIN removes CENTER_ADMIN → 200 OK
+ * A8 — CENTER_ADMIN creates staff member → 201 Created
+ * A9 — CENTER_ADMIN lists staff for their center → 200 OK
+ * A10 — CENTER_ADMIN removes their own staff → 200 OK
  * A11 — CENTER_ADMIN removes staff from different center → 403 Forbidden
- * A12 — POST /api/auth/forgot-password, unknown email  → 404 Not Found
+ * A12 — POST /api/auth/forgot-password, unknown email → 404 Not Found
  * A13 — POST /api/auth/reset-password, no OTP requested → 400 Bad Request
- * A14 — POST /api/auth/reset-password, wrong OTP      → 400 Bad Request
+ * A14 — POST /api/auth/reset-password, wrong OTP → 400 Bad Request
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -56,26 +56,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthIntegrationTest {
 
-    @Autowired MockMvc mockMvc;
-    @Autowired IRoleRepository roleRepository;
-    @Autowired IUserRepository userRepository;
-    @Autowired IAdminRepository adminRepository;
-    @Autowired IDiagnosticCenterRepository centerRepository;
-    @Autowired IAuthTokenService authTokenService;
-    @Autowired AuthTokenServiceImpl authTokenServiceImpl;
-    @Autowired IPasswordEncoderService passwordEncoderService;
+    @Autowired
+    MockMvc mockMvc;
+    @Autowired
+    IRoleRepository roleRepository;
+    @Autowired
+    IUserRepository userRepository;
+    @Autowired
+    IAdminRepository adminRepository;
+    @Autowired
+    IDiagnosticCenterRepository centerRepository;
+    @Autowired
+    IAuthTokenService authTokenService;
+    @Autowired
+    AuthTokenServiceImpl authTokenServiceImpl;
+    @Autowired
+    IPasswordEncoderService passwordEncoderService;
 
     // Mock mail sender so forgot-password tests don't need a real SMTP server
-    @MockBean JavaMailSender javaMailSender;
+    @MockBean
+    JavaMailSender javaMailSender;
 
     private static String adminToken;
     private static String customerToken;
     private static String centerAdminToken;
-    private static String centerAdminOtherToken;  // belongs to a different center
+    private static String centerAdminOtherToken; // belongs to a different center
     private static String refreshTokenValue;
-    private static int centerAdminUserId;         // used by A7
-    private static int staffUserId;              // used by A10/A11
-    private static int otherCenterStaffId;       // staff at a different center
+    private static int centerAdminUserId; // used by A7
+    private static int staffUserId; // used by A10/A11
+    private static int otherCenterStaffId; // staff at a different center
     private static int centerId;
     private static int otherCenterId;
 
@@ -95,10 +104,10 @@ class AuthIntegrationTest {
         if (roleRepository.findByRoleName(RoleConstants.CENTER_STAFF).isEmpty())
             roleRepository.save(Role.builder().roleName(RoleConstants.CENTER_STAFF).build());
 
-        Role adminRole       = roleRepository.findByRoleName(RoleConstants.ADMIN).get();
-        Role customerRole    = roleRepository.findByRoleName(RoleConstants.CUSTOMER).get();
+        Role adminRole = roleRepository.findByRoleName(RoleConstants.ADMIN).get();
+        Role customerRole = roleRepository.findByRoleName(RoleConstants.CUSTOMER).get();
         Role centerAdminRole = roleRepository.findByRoleName(RoleConstants.CENTER_ADMIN).get();
-        Role staffRole       = roleRepository.findByRoleName(RoleConstants.CENTER_STAFF).get();
+        Role staffRole = roleRepository.findByRoleName(RoleConstants.CENTER_STAFF).get();
 
         // ── Diagnostic centers ─────────────────────────────────────────────────
         DiagnosticCenter center = centerRepository.findAll().stream()
