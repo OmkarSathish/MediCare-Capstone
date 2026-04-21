@@ -10,6 +10,9 @@ import {
   ChevronLeft,
   Loader2,
   Search,
+  X,
+  ArrowLeft,
+  Shield,
 } from "lucide-react";
 import { centersApi } from "../api/centers";
 import { appointmentApi } from "../api/appointments";
@@ -24,7 +27,7 @@ type Step = 1 | 2 | 3 | 4;
 
 export default function BookAppointmentPage() {
   useTitle("Book Appointment");
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
 
   if (isAdmin) {
@@ -34,6 +37,7 @@ export default function BookAppointmentPage() {
   const [params] = useSearchParams();
   const preFillCenterId = params.get("centerId");
   const preFillTestId = params.get("testId");
+  const preFillDate = params.get("date");
 
   const [step, setStep] = useState<Step>(1);
 
@@ -52,14 +56,26 @@ export default function BookAppointmentPage() {
   const [testsLoading, setTestsLoading] = useState(false);
 
   // Step 3 - Date + special requests
-  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentDate, setAppointmentDate] = useState(() => {
+    // Pre-fill if a valid future date was passed via ?date=
+    if (preFillDate) {
+      const minD = new Date();
+      if (preFillDate >= minD.toISOString().split("T")[0]) return preFillDate;
+    }
+    return "";
+  });
   const [specialRequests, setSpecialRequests] = useState("");
 
   // Submit
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Load centers on mount — if coming from a test page, only show centers that offer that test
+  // Payment modal
+  const [payModal, setPayModal] = useState(false);
+  type PayScreen = "contact" | "upi";
+  const [payScreen, setPayScreen] = useState<PayScreen>("contact");
+  const [payPhone, setPayPhone] = useState("");
+
   useEffect(() => {
     setCentersLoading(true);
     const fetchPromise = preFillTestId
@@ -126,8 +142,10 @@ export default function BookAppointmentPage() {
         appointmentDate,
         specialRequests: specialRequests.trim() || undefined,
       });
+      setPayModal(false);
       navigate(`/appointments/${res.data.data?.id}`);
     } catch (err: any) {
+      setPayModal(false);
       setSubmitError(
         err?.response?.data?.message ?? "Failed to book appointment.",
       );
@@ -136,8 +154,17 @@ export default function BookAppointmentPage() {
     }
   };
 
+  const openPayModal = () => {
+    const raw = (user?.phone ?? "")
+      .replace(/(\+91[\-\s]?|^0)/, "")
+      .replace(/\D/g, "")
+      .slice(0, 10);
+    setPayPhone(raw);
+    setPayScreen("contact");
+    setPayModal(true);
+  };
+
   const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
   const minDateStr = minDate.toISOString().split("T")[0];
 
   const stepLabels = [
@@ -345,7 +372,7 @@ export default function BookAppointmentPage() {
             onChange={(e) => setAppointmentDate(e.target.value)}
           />
           <p className="text-xs text-gray-400 mt-2">
-            Appointments can be booked starting from tomorrow.
+            Appointments can be booked starting from today.
           </p>
           <p className="text-xs text-gray-400 mt-1">
             You can book up to 4 tests across 3 different centers per day.
@@ -466,7 +493,7 @@ export default function BookAppointmentPage() {
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
             <button
-              onClick={handleSubmit}
+              onClick={openPayModal}
               disabled={submitting}
               className="btn-primary flex items-center gap-2 disabled:opacity-60"
             >
@@ -478,6 +505,139 @@ export default function BookAppointmentPage() {
                 "Confirm Booking"
               )}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {payModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => !submitting && setPayModal(false)}
+          />
+          <div className="relative w-full max-w-sm mx-4 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="bg-[#2563EB] px-5 pt-5 pb-6 text-white">
+              <div className="flex items-center justify-between mb-4">
+                {payScreen === "upi" ? (
+                  <button
+                    onClick={() => setPayScreen("contact")}
+                    className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <div className="w-7 h-7" />
+                )}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center font-bold text-sm">
+                    M
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm leading-tight">MediCare</p>
+                    <p className="text-[10px] text-green-300 flex items-center gap-1">
+                      <Shield className="w-2.5 h-2.5" /> Razorpay Trusted
+                      Business
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => !submitting && setPayModal(false)}
+                  className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-center mt-2">
+                <p className="text-white/70 text-xs mb-1">Total Amount</p>
+                <p className="text-3xl font-extrabold tracking-tight">
+                  ₹{totalCost.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="bg-white">
+              {/* Screen 1: Contact */}
+              {payScreen === "contact" && (
+                <div className="px-5 py-5 space-y-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Contact Details
+                  </p>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">
+                      Phone Number
+                    </label>
+                    <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="px-3 py-2.5 bg-gray-50 border-r border-gray-200 text-sm text-gray-700 font-medium">
+                        +91
+                      </div>
+                      <input
+                        type="tel"
+                        className="flex-1 px-3 py-2.5 text-sm outline-none"
+                        maxLength={10}
+                        value={payPhone}
+                        onChange={(e) =>
+                          setPayPhone(
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Screen 2: UPI QR */}
+              {payScreen === "upi" && (
+                <div className="px-5 py-5 flex flex-col items-center gap-3">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Scan &amp; Pay via UPI
+                  </p>
+                  <div className="border border-gray-200 rounded-xl p-3 bg-gray-50">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=medicare%40upi%26am=${totalCost.toFixed(2)}%26tn=MediCare+Appointment`}
+                      alt="UPI QR Code"
+                      className="w-44 h-44"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 text-center">
+                    Scan with GPay, PhonePe, PayTm or any UPI app
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="bg-white border-t border-gray-100 px-5 py-4">
+              {payScreen === "contact" ? (
+                <button
+                  onClick={() => setPayScreen("upi")}
+                  disabled={payPhone.length < 10}
+                  className="w-full bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm"
+                >
+                  Go
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="w-full bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Processing…
+                    </>
+                  ) : (
+                    "Pay Now"
+                  )}
+                </button>
+              )}
+              <p className="text-center text-[10px] text-gray-400 mt-3 flex items-center justify-center gap-1">
+                <Shield className="w-3 h-3" /> Secured by Razorpay
+              </p>
+            </div>
           </div>
         </div>
       )}
