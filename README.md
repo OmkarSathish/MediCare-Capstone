@@ -1,5 +1,6 @@
-# MediCare — Diagnostic Appointment Booking System
+<img src="asset/Logo.png" alt="MediCare Logo" width="100%" />
 
+# MediCare — Diagnostic Appointment Booking System
 A full-stack web application that lets patients discover diagnostic centers, book test appointments, and track their status, while giving center administrators and staff tools to manage centers, tests, and approvals.
 
 ---
@@ -47,6 +48,13 @@ A full-stack web application that lets patients discover diagnostic centers, boo
    export DB_PASSWORD=your_password
    ```
 
+   On Windows (Command Prompt):
+
+   ```cmd
+   set DB_USERNAME=your_username
+   set DB_PASSWORD=your_password
+   ```
+
 > **Schema & seed data** are created automatically on first startup via Hibernate (`ddl-auto: update`) and the built-in `DataSeeder`. No manual SQL scripts need to be run.
 
 ---
@@ -56,12 +64,14 @@ A full-stack web application that lets patients discover diagnostic centers, boo
 From the project root:
 
 ```bash
+cd healthcare
 ./mvnw spring-boot:run
 ```
 
 On Windows:
 
 ```bash
+cd healthcare
 mvnw.cmd spring-boot:run
 ```
 
@@ -77,6 +87,13 @@ The database is seeded automatically on the **first** startup (skipped on subseq
 cd web
 npm install
 npm run dev
+```
+
+Or from the project root:
+
+```bash
+npm install --prefix web
+npm run dev --prefix web
 ```
 
 The app is available at **http://localhost:5173**.
