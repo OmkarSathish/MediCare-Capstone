@@ -592,6 +592,13 @@ export default function BookAppointmentPage() {
               {/* Screen 2: UPI QR */}
               {payScreen === "upi" && (
                 <div className="px-5 py-5 flex flex-col items-center gap-3">
+                  {/* Mockup disclaimer */}
+                  <div className="w-full bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 flex items-start gap-2">
+                    <span className="text-amber-500 text-base leading-none mt-0.5">⚠️</span>
+                    <p className="text-xs text-amber-700 leading-snug">
+                      <span className="font-semibold">Demo only.</span> This UPI interface is a mockup — no real payment will be processed.
+                    </p>
+                  </div>
                   <p className="text-sm font-semibold text-gray-700">
                     Scan &amp; Pay via UPI
                   </p>
