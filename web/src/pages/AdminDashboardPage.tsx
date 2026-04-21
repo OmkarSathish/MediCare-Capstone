@@ -13,6 +13,7 @@ import {
   Building2,
   CheckCircle,
   XCircle,
+  IndianRupee,
 } from "lucide-react";
 import {
   BarChart,
@@ -38,6 +39,10 @@ import type {
 const STATUS_COLORS = ["#f59e0b", "#22c55e", "#ef4444", "#6b7280"];
 const BAR_COLOR = "#3b82f6";
 const LINE_COLOR = "#6366f1";
+const REVENUE_COLOR = "#10b981";
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 
 export default function AdminDashboardPage() {
   useTitle("Admin Dashboard");
@@ -98,6 +103,14 @@ export default function AdminDashboardPage() {
     const centerTestData = Object.entries(cs?.topTests ?? {}).map(
       ([name, count]) => ({ name, count }),
     );
+
+    const centerRevMonthData = Object.entries(cs?.revenueByMonth ?? {}).map(
+      ([month, revenue]) => ({ month, revenue }),
+    );
+
+    const centerRevTestData = Object.entries(cs?.revenueByTest ?? {})
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a, b) => b.revenue - a.revenue);
 
     const centerHeadline = [
       {
@@ -254,6 +267,101 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
+        {/* Revenue section ── Center Admin only (not staff) */}
+        {isCenterAdmin && (
+        <div className="mt-8 mb-2">
+          <div className="flex items-center gap-2 mb-4">
+            <IndianRupee className="w-5 h-5 text-emerald-600" />
+            <h2 className="text-lg font-bold text-gray-900">Revenue Analytics</h2>
+          </div>
+          {/* Revenue headline */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="card bg-emerald-50 border border-emerald-100">
+              <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center mb-3">
+                <IndianRupee className="w-5 h-5" />
+              </div>
+              <div className="text-2xl font-extrabold text-emerald-700">
+                {fmt(cs?.totalRevenue ?? 0)}
+              </div>
+              <div className="text-emerald-600 text-xs mt-1">Total Revenue (Approved)</div>
+            </div>
+            <div className="card">
+              <div className="text-xs text-gray-400 mb-1">Avg Revenue / Appointment</div>
+              <div className="text-2xl font-extrabold text-gray-900">
+                {cs?.approvedAppointments
+                  ? fmt((cs.totalRevenue ?? 0) / cs.approvedAppointments)
+                  : "—"}
+              </div>
+              <div className="text-gray-400 text-xs mt-1">per approved booking</div>
+            </div>
+            <div className="card">
+              <div className="text-xs text-gray-400 mb-1">Top Earning Test</div>
+              <div className="text-lg font-extrabold text-gray-900 truncate">
+                {centerRevTestData[0]?.name ?? "—"}
+              </div>
+              <div className="text-emerald-600 text-sm font-semibold mt-1">
+                {centerRevTestData[0] ? fmt(centerRevTestData[0].revenue) : ""}
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue charts: monthly trend + by test */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Revenue by month */}
+            <div className="card">
+              <h3 className="font-bold text-gray-900 mb-5">Revenue by Month</h3>
+              {centerRevMonthData.length === 0 ? (
+                <div className="flex items-center justify-center h-48 text-gray-300 text-sm">No data yet</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={centerRevMonthData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                    <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: 12 }}
+                      formatter={(v: number) => [fmt(v), "Revenue"]}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke={REVENUE_COLOR} strokeWidth={2.5}
+                      dot={{ r: 4, fill: REVENUE_COLOR }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            {/* Revenue by test */}
+            <div className="card">
+              <h3 className="font-bold text-gray-900 mb-5">Revenue by Test</h3>
+              {centerRevTestData.length === 0 ? (
+                <div className="flex items-center justify-center h-48 text-gray-300 text-sm">No data yet</div>
+              ) : (
+                (() => {
+                  const max = Math.max(...centerRevTestData.map((d) => d.revenue));
+                  return (
+                    <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                      {centerRevTestData.map((d, i) => (
+                        <div key={d.name} className="flex items-center gap-3 min-w-0">
+                          <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                            ${i === 0 ? "bg-emerald-600 text-white" : i === 1 ? "bg-emerald-100 text-emerald-700" : "bg-gray-50 text-gray-400"}`}>
+                            {i + 1}
+                          </span>
+                          <span className="w-32 shrink-0 text-xs text-gray-700 font-medium truncate" title={d.name}>{d.name}</span>
+                          <div className="flex-1 bg-gray-100 rounded-full h-2 min-w-0">
+                            <div className="h-2 rounded-full bg-emerald-500 transition-all"
+                              style={{ width: `${(d.revenue / max) * 100}%` }} />
+                          </div>
+                          <span className="shrink-0 text-xs font-semibold text-emerald-700 w-20 text-right">{fmt(d.revenue)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()
+              )}
+            </div>
+          </div>
+        </div>
+        )} {/* end isCenterAdmin revenue */}
+
         {/* Top tests bar chart + quick actions */}
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="card">
@@ -371,6 +479,18 @@ export default function AdminDashboardPage() {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => Number(b.count) - Number(a.count));
 
+  const revMonthData = Object.entries(stats?.revenueByMonth ?? {}).map(
+    ([month, revenue]) => ({ month, revenue }),
+  );
+
+  const revCenterData = Object.entries(stats?.revenueByCenter ?? {})
+    .map(([name, revenue]) => ({ name, revenue }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  const revTestData = Object.entries(stats?.revenueByTest ?? {})
+    .map(([name, revenue]) => ({ name, revenue }))
+    .sort((a, b) => b.revenue - a.revenue);
+
   const headlineStats = [
     {
       label: "Total Appointments",
@@ -406,6 +526,30 @@ export default function AdminDashboardPage() {
       icon: UserCog,
       color: "bg-orange-50 text-orange-600",
       link: "/admin/center-admins",
+    },
+  ];
+
+  const revenueHeadline = [
+    {
+      label: "Total Platform Revenue",
+      display: fmt(stats?.totalRevenue ?? 0),
+      icon: IndianRupee,
+      color: "bg-emerald-50 text-emerald-700",
+      sub: "from approved appointments",
+    },
+    {
+      label: "Top Earning Center",
+      display: revCenterData[0]?.name ?? "—",
+      icon: Building2,
+      color: "bg-teal-50 text-teal-700",
+      sub: revCenterData[0] ? fmt(revCenterData[0].revenue) : "",
+    },
+    {
+      label: "Top Earning Test",
+      display: revTestData[0]?.name ?? "—",
+      icon: Microscope,
+      color: "bg-cyan-50 text-cyan-700",
+      sub: revTestData[0] ? fmt(revTestData[0].revenue) : "",
     },
   ];
 
@@ -652,6 +796,115 @@ export default function AdminDashboardPage() {
               );
             })()
           )}
+        </div>
+      </div>
+
+      {/* ── Revenue section ── */}
+      <div className="mt-10">
+        <div className="flex items-center gap-2 mb-5">
+          <IndianRupee className="w-5 h-5 text-emerald-600" />
+          <h2 className="text-lg font-bold text-gray-900">Revenue Analytics</h2>
+        </div>
+
+        {/* Revenue headline cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {revenueHeadline.map(({ label, display, icon: Icon, color, sub }) => (
+            <div key={label} className="card">
+              <div className={`w-10 h-10 ${color} rounded-xl flex items-center justify-center mb-3`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="text-xl font-extrabold text-gray-900 truncate" title={display}>
+                {display}
+              </div>
+              <div className="text-gray-400 text-xs mt-1">{label}</div>
+              {sub && <div className="text-emerald-600 text-xs font-semibold mt-0.5">{sub}</div>}
+            </div>
+          ))}
+        </div>
+
+        {/* Revenue charts row 1: monthly trend */}
+        <div className="card mb-6">
+          <h3 className="font-bold text-gray-900 mb-5">Platform Revenue by Month</h3>
+          {revMonthData.length === 0 ? (
+            <div className="flex items-center justify-center h-48 text-gray-300 text-sm">No approved appointments yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={revMonthData} margin={{ top: 5, right: 10, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} />
+                <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                <Tooltip
+                  contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", fontSize: 12 }}
+                  formatter={(v: number) => [fmt(v), "Revenue"]}
+                />
+                <Line type="monotone" dataKey="revenue" stroke={REVENUE_COLOR} strokeWidth={2.5}
+                  dot={{ r: 4, fill: REVENUE_COLOR }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Revenue charts row 2: by center + by test */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Revenue by center */}
+          <div className="card">
+            <h3 className="font-bold text-gray-900 mb-5">Revenue by Center</h3>
+            {revCenterData.length === 0 ? (
+              <div className="flex items-center justify-center h-48 text-gray-300 text-sm">No data yet</div>
+            ) : (
+              (() => {
+                const max = Math.max(...revCenterData.map((d) => d.revenue));
+                return (
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    {revCenterData.map((d, i) => (
+                      <div key={d.name} className="flex items-center gap-3 min-w-0">
+                        <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                          ${i === 0 ? "bg-emerald-600 text-white" : i === 1 ? "bg-emerald-100 text-emerald-700" : i === 2 ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}>
+                          {i + 1}
+                        </span>
+                        <span className="w-36 shrink-0 text-xs text-gray-700 font-medium truncate" title={d.name}>{d.name}</span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-2 min-w-0">
+                          <div className="h-2 rounded-full bg-emerald-500 transition-all"
+                            style={{ width: `${(d.revenue / max) * 100}%` }} />
+                        </div>
+                        <span className="shrink-0 text-xs font-semibold text-emerald-700 w-20 text-right">{fmt(d.revenue)}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()
+            )}
+          </div>
+
+          {/* Revenue by test */}
+          <div className="card">
+            <h3 className="font-bold text-gray-900 mb-5">Revenue by Test</h3>
+            {revTestData.length === 0 ? (
+              <div className="flex items-center justify-center h-48 text-gray-300 text-sm">No data yet</div>
+            ) : (
+              (() => {
+                const max = Math.max(...revTestData.map((d) => d.revenue));
+                return (
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    {revTestData.map((d, i) => (
+                      <div key={d.name} className="flex items-center gap-3 min-w-0">
+                        <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                          ${i === 0 ? "bg-emerald-600 text-white" : i === 1 ? "bg-emerald-100 text-emerald-700" : i === 2 ? "bg-gray-100 text-gray-600" : "bg-gray-50 text-gray-400"}`}>
+                          {i + 1}
+                        </span>
+                        <span className="w-36 shrink-0 text-xs text-gray-700 font-medium truncate" title={d.name}>{d.name}</span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-2 min-w-0">
+                          <div className="h-2 rounded-full bg-emerald-500 transition-all"
+                            style={{ width: `${(d.revenue / max) * 100}%` }} />
+                        </div>
+                        <span className="shrink-0 text-xs font-semibold text-emerald-700 w-20 text-right">{fmt(d.revenue)}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()
+            )}
+          </div>
         </div>
       </div>
     </div>

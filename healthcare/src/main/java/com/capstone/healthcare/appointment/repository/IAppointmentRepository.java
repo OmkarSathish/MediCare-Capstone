@@ -2,6 +2,7 @@ package com.capstone.healthcare.appointment.repository;
 
 import com.capstone.healthcare.appointment.model.Appointment;
 import com.capstone.healthcare.appointment.model.ApprovalStatus;
+import com.capstone.healthcare.diagnosticcenter.model.CenterTestOffering;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -101,4 +102,89 @@ public interface IAppointmentRepository extends JpaRepository<Appointment, Integ
   /** Top tests booked at a given center: [testName, count] */
   @Query("SELECT t.testName, COUNT(a) FROM Appointment a JOIN a.diagnosticTests t WHERE a.diagnosticCenter.id = :centerId GROUP BY t.testName ORDER BY COUNT(a) DESC")
   List<Object[]> countByTestForCenter(@Param("centerId") int centerId);
+
+  // ── Revenue aggregations (APPROVED appointments only) ─────────────────────
+
+  /**
+   * Total platform revenue: sum of all test offering prices for APPROVED appts.
+   * Uses the current offering price as the booking price.
+   */
+  @Query("""
+      SELECT COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED'
+      """)
+  Double sumTotalRevenue();
+
+  /** Revenue per center: [centerName, revenue] */
+  @Query("""
+      SELECT a.diagnosticCenter.name, COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED'
+      GROUP BY a.diagnosticCenter.name
+      ORDER BY SUM(o.price) DESC
+      """)
+  List<Object[]> revenueByCenter();
+
+  /** Revenue per test (platform-wide): [testName, revenue] */
+  @Query("""
+      SELECT t.testName, COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED'
+      GROUP BY t.testName
+      ORDER BY SUM(o.price) DESC
+      """)
+  List<Object[]> revenueByTest();
+
+  /** Revenue per month (platform-wide): [year, month, revenue] */
+  @Query("""
+      SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED'
+      GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)
+      ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)
+      """)
+  List<Object[]> revenueByMonth();
+
+  /** Total revenue for a specific center: [revenue] */
+  @Query("""
+      SELECT COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED' AND a.diagnosticCenter.id = :centerId
+      """)
+  Double sumRevenueForCenter(@Param("centerId") int centerId);
+
+  /** Revenue per test for a specific center: [testName, revenue] */
+  @Query("""
+      SELECT t.testName, COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED' AND a.diagnosticCenter.id = :centerId
+      GROUP BY t.testName
+      ORDER BY SUM(o.price) DESC
+      """)
+  List<Object[]> revenueByTestForCenter(@Param("centerId") int centerId);
+
+  /** Revenue per month for a specific center: [year, month, revenue] */
+  @Query("""
+      SELECT YEAR(a.appointmentDate), MONTH(a.appointmentDate), COALESCE(SUM(o.price), 0)
+      FROM Appointment a
+      JOIN a.diagnosticTests t
+      JOIN CenterTestOffering o ON o.center = a.diagnosticCenter AND o.test = t
+      WHERE a.approvalStatus = 'APPROVED' AND a.diagnosticCenter.id = :centerId
+      GROUP BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)
+      ORDER BY YEAR(a.appointmentDate), MONTH(a.appointmentDate)
+      """)
+  List<Object[]> revenueByMonthForCenter(@Param("centerId") int centerId);
 }

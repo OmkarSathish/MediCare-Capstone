@@ -78,6 +78,40 @@ public class AdminDashboardServiceImpl implements IAdminDashboardService {
                         (a, b) -> a,
                         LinkedHashMap::new));
 
+        // ── Revenue ───────────────────────────────────────────────────────────────
+        Double rawTotal = appointmentRepository.sumTotalRevenue();
+        double totalRevenue = rawTotal != null ? rawTotal : 0.0;
+
+        Map<String, Double> revenueByCenter = appointmentRepository.revenueByCenter().stream()
+                .collect(Collectors.toMap(
+                        r -> (String) r[0],
+                        r -> ((Number) r[1]).doubleValue(),
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+
+        Map<String, Double> revenueByTest = appointmentRepository.revenueByTest().stream()
+                .limit(5)
+                .collect(Collectors.toMap(
+                        r -> (String) r[0],
+                        r -> ((Number) r[1]).doubleValue(),
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+
+        Map<String, Double> rawRevByMonth = appointmentRepository.revenueByMonth().stream()
+                .collect(Collectors.toMap(
+                        r -> String.format("%04d-%02d", (Number) r[0], (Number) r[1]),
+                        r -> ((Number) r[2]).doubleValue(),
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+        Map<String, Double> revenueByMonth = rawRevByMonth.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .skip(Math.max(0, rawRevByMonth.size() - 12))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> a,
+                        LinkedHashMap::new));
+
         return AdminDashboardResponse.builder()
                 .totalCenters(totalCenters)
                 .totalTests(totalTests)
@@ -91,6 +125,10 @@ public class AdminDashboardServiceImpl implements IAdminDashboardService {
                 .appointmentsByCenter(byCenter)
                 .appointmentsByMonth(last12Months)
                 .topTests(topTests)
+                .totalRevenue(totalRevenue)
+                .revenueByCenter(revenueByCenter)
+                .revenueByTest(revenueByTest)
+                .revenueByMonth(revenueByMonth)
                 .build();
     }
 }

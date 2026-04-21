@@ -25,6 +25,19 @@ public class AdminDashboardResponse {
     private long rejectedAppointments;
     private long cancelledAppointments;
 
+    // ── Revenue ──────────────────────────────────────────────────────────────
+    /** Total revenue from all APPROVED appointments */
+    private double totalRevenue;
+
+    /** { centerName → revenue } — approved appointments only */
+    private Map<String, Double> revenueByCenter;
+
+    /** { testName → revenue } — top 5 by revenue */
+    private Map<String, Double> revenueByTest;
+
+    /** { "YYYY-MM" → revenue } — last 12 months */
+    private Map<String, Double> revenueByMonth;
+
     // ── Charts ───────────────────────────────────────────────────────────────
     /** { centerName → appointmentCount } */
     private Map<String, Long> appointmentsByCenter;

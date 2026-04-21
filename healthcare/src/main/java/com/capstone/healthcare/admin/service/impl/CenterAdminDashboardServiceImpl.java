@@ -67,6 +67,33 @@ public class CenterAdminDashboardServiceImpl implements ICenterAdminDashboardSer
                                                 (a, b) -> a,
                                                 LinkedHashMap::new));
 
+                // ── Revenue ─────────────────────────────────────────────────────────────
+                Double rawRevTotal = appointmentRepository.sumRevenueForCenter(centerId);
+                double totalRevenue = rawRevTotal != null ? rawRevTotal : 0.0;
+
+                Map<String, Double> revenueByTest = appointmentRepository.revenueByTestForCenter(centerId).stream()
+                                .limit(5)
+                                .collect(Collectors.toMap(
+                                                r -> (String) r[0],
+                                                r -> ((Number) r[1]).doubleValue(),
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
+
+                Map<String, Double> rawRevByMonth = appointmentRepository.revenueByMonthForCenter(centerId).stream()
+                                .collect(Collectors.toMap(
+                                                r -> String.format("%04d-%02d", (Number) r[0], (Number) r[1]),
+                                                r -> ((Number) r[2]).doubleValue(),
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
+                Map<String, Double> revenueByMonth = rawRevByMonth.entrySet().stream()
+                                .sorted(Map.Entry.comparingByKey())
+                                .skip(Math.max(0, rawRevByMonth.size() - 12))
+                                .collect(Collectors.toMap(
+                                                Map.Entry::getKey,
+                                                Map.Entry::getValue,
+                                                (a, b) -> a,
+                                                LinkedHashMap::new));
+
                 return CenterAdminDashboardResponse.builder()
                                 .centerName(center.getName())
                                 .totalAppointments(total)
@@ -77,6 +104,9 @@ public class CenterAdminDashboardServiceImpl implements ICenterAdminDashboardSer
                                 .assignedTests(assignedTests)
                                 .appointmentsByMonth(last12Months)
                                 .topTests(topTests)
+                                .totalRevenue(totalRevenue)
+                                .revenueByTest(revenueByTest)
+                                .revenueByMonth(revenueByMonth)
                                 .build();
         }
 }

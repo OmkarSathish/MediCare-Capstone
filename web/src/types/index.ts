@@ -136,6 +136,10 @@ export interface CenterAdminDashboardResponse {
   assignedTests: number;
   appointmentsByMonth: Record<string, number>;
   topTests: Record<string, number>;
+  // Revenue
+  totalRevenue: number;
+  revenueByTest: Record<string, number>;
+  revenueByMonth: Record<string, number>;
 }
 
 export interface AdminDashboardResponse {
@@ -151,6 +155,11 @@ export interface AdminDashboardResponse {
   appointmentsByCenter: Record<string, number>;
   appointmentsByMonth: Record<string, number>;
   topTests: Record<string, number>;
+  // Revenue
+  totalRevenue: number;
+  revenueByCenter: Record<string, number>;
+  revenueByTest: Record<string, number>;
+  revenueByMonth: Record<string, number>;
 }
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────

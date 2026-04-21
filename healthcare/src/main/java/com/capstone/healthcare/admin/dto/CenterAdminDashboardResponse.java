@@ -22,6 +22,16 @@ public class CenterAdminDashboardResponse {
     private long cancelledAppointments;
     private long assignedTests;
 
+    // ── Revenue ──────────────────────────────────────────────────────────────
+    /** Total revenue from APPROVED appointments at this center */
+    private double totalRevenue;
+
+    /** { testName → revenue } — top 5 by revenue for this center */
+    private Map<String, Double> revenueByTest;
+
+    /** { "YYYY-MM" → revenue } — last 12 months */
+    private Map<String, Double> revenueByMonth;
+
     // ── Charts ───────────────────────────────────────────────────────────────
     /** { "YYYY-MM" → appointmentCount } — last 12 months */
     private Map<String, Long> appointmentsByMonth;
