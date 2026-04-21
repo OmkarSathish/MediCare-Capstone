@@ -57,10 +57,11 @@ export default function BookAppointmentPage() {
 
   // Step 3 - Date + special requests
   const [appointmentDate, setAppointmentDate] = useState(() => {
-    // Pre-fill if a valid future date was passed via ?date=
+    // Pre-fill if a valid future date (strictly after today) was passed via ?date=
     if (preFillDate) {
-      const minD = new Date();
-      if (preFillDate >= minD.toISOString().split("T")[0]) return preFillDate;
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (preFillDate >= tomorrow.toISOString().split("T")[0]) return preFillDate;
     }
     return "";
   });
@@ -165,6 +166,7 @@ export default function BookAppointmentPage() {
   };
 
   const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 1); // @Future: must be strictly after today
   const minDateStr = minDate.toISOString().split("T")[0];
 
   const stepLabels = [
